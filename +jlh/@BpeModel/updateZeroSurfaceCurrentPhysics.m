@@ -1,0 +1,2 @@
+function updateZeroSurfaceCurrentPhysics(obj)
+end
