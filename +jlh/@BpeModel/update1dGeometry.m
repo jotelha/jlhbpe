@@ -1,6 +1,7 @@
 function update1dGeometry(obj)
     fprintf('  Modifying geometry...\n');
 
+    
 %     obj.geom.repairTol(1e-16); % should be smaller than smallest elements
 %     obj.space.set('intervals','many');
 %     % space.set('p','0,lambdaD,L'); % an interval with three points
@@ -45,5 +46,11 @@ function update1dGeometry(obj)
     obj.m.selection('bulkExitVertex1d').set('xmax', '1+epsilon/2');
 %     obj.m.selection('bulkExitVertex1d').set(3);
     % mphgeom(model,'geom','vertexmode','on'); % plots the geometry
-    obj.m.geom('geom1d').run;
+    
+    % assembly 
+    obj.m.geom('geom1d').feature('fin').set('action', 'assembly');
+    obj.m.geom('geom1d').feature('fin').set('repairtol', '1.0E-16');
+    obj.m.geom('geom1d').run('fin');
+    
+%     obj.m.geom('geom1d').run;
 end

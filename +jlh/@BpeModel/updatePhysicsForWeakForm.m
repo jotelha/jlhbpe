@@ -378,12 +378,17 @@ function obj = updatePhysicsForWeakForm(obj)
     
 % weak formulation, 1d
     % set discretization
-    obj.m.physics('WeakFormulation1d').prop('ShapeProperty').set('order', '4');
+    obj.m.physics('WeakFormulation1d').prop('ShapeProperty').set('order', '7');
     obj.m.physics('WeakFormulation1d').prop('ShapeProperty').set('valueType', 'real');
-    obj.m.physics('WeakFormulation1d').prop('ShapeProperty').set('shapeFunctionType', 'shherm');
+%     obj.m.physics('WeakFormulation1d').prop('ShapeProperty').set('shapeFunctionType', 'shherm'); % Hermitian
+    obj.m.physics('WeakFormulation1d').prop('ShapeProperty').set('shapeFunctionType', 'shlag'); % Lagrangian
     
     obj.m.physics('WeakFormulation1d').field('dimensionless').component([obj.c_id {'phi'}]);
     obj.m.physics('WeakFormulation1d').feature('wfeq1').set('weak', wEquations1d);
+    
+    % assembly continuity
+    obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', 'ap1', 0);
+    obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', 'ap2', 1);
   
     % Nernst Planck
     for i=1:obj.numberOfSpecies

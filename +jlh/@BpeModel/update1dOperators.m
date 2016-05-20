@@ -10,7 +10,10 @@ function obj = update1dOperators(obj)
     surfaceVertexIndex = obj.m.selection('surfaceVertex1d').entities(0);
     zetaVertexIndex = obj.m.selection('zetaVertex1d').entities(0);
 %     bulkExitVertexIndex = obj.m.selection('bulkExitVertex1d').entities(0);
-
+    
+    if( numel(zetaVertexIndex) > 1 )
+        zetaVertexIndex = zetaVertexIndex(1);
+    end
     obj.m.cpl('projectReactionPlaneToSurface1d').selection.geom('geom1d', 0);
     obj.m.cpl('projectReactionPlaneToSurface1d').selection.named('zetaVertex1d');
     obj.m.cpl('projectReactionPlaneToSurface1d').label('projectReactionPlaneToSurface1d');

@@ -24,3 +24,6 @@
 
 # log file
 *.log
+
+# dat directories
+*/dat

@@ -41,6 +41,10 @@ function create1dComponent(obj)
     % weak formulation
     obj.m.physics.create('WeakFormulation1d','WeakFormPDE','geom1d');
     obj.m.physics('WeakFormulation1d').label('WeakFormulation1d');
+    
+    % continuities for assembly pairs
+    obj.m.physics('WeakFormulation1d').feature.create('assemblyContinuity1d', 'Continuity', 0);
+
 
     % flux and concentration BC
     for i=1:obj.numberOfSpecies 

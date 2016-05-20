@@ -124,6 +124,9 @@ m.m.sol(sol_id).create(variables_id, 'Variables');
 m.m.sol(sol_id).create(solver_id, 'Stationary');
 m.m.sol(sol_id).create(store_id, 'StoreSolution');
 
+% set scaling for variables
+m.m.sol(sol_id).feature(variables_id).set('scalemethod','init');
+
 % what do those stand for:
 m.m.study(study_id).feature(studyStep_id).set('initstudyhide', 'on');
 m.m.study(study_id).feature(studyStep_id).set('initsolhide', 'on');
@@ -159,11 +162,14 @@ m.m.sol(sol_id).feature(compile_id).set('studystep', studyStep_id);
 
 m.m.sol(sol_id).feature(solver_id).set('probesel', 'none');
 m.m.sol(sol_id).feature(solver_id).set('nonlin', 'on');
-m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
-m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
-m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('niter', '30');
-m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermauto', 'itertol');
-m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('minsteph', '1.0E-16');
+m.m.sol(sol_id).feature(solver_id).set('stol', '1e-5');
+
+m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'const');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('niter', '30');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermauto', 'itertol');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('minsteph', '1.0E-16');
 m.m.sol(sol_id).feature(solver_id).feature('pDef').set('sweeptype', 'filled');
 m.m.sol(sol_id).feature(solver_id).feature('pDef').set('pcontinuationmode', pcontinuationmode);
 m.m.sol(sol_id).feature(solver_id).feature('pDef').set('plistarr', plistarr);
@@ -187,8 +193,13 @@ storedSolutions = m.m.study(study_id).getSolverSequences('Stored');
 solInfo = mphsolinfo(m.m,'soltag',char(storedSolutions(1)));
 dset = char(solInfo.dataset(2));
 
-m.updateEvaluations1d(dset);
+m.updateFluxEvaluations1d(dset);
+
+%% 
+% m.updateEvaluations1d(dset);
 m.plot1dSolution(dset);
+
+return;
 
 %% meshing for 2d component
 
@@ -215,6 +226,93 @@ m.m.disableUpdates(true);
 % a = m.intFirstDebyeLength(1);
 % r = m.intFirstDebyeLength(2)/m.intFirstDebyeLength(1);
 % N = ceil(log(1-m.epsilon/a*(1-r))/log(r));
+
+%% single-step bpe study, 2d
+sweepParameterValues = {-0.28210/m.UT};
+pname = {'phi_bpe_init'};
+plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
+punit = '';
+useparam = 'on';
+pcontinuationmode = 'no';
+
+          
+studyNum = m.m.study.size() + 1;
+study_id = sprintf('study%u',studyNum);
+
+currentStationaryStudy = m.m.study.create(study_id);
+
+solNum = m.m.sol.size() + 1;
+sol_id = sprintf('sol%u',solNum);
+
+m.m.sol.create(sol_id);
+m.m.sol(sol_id).study(study_id); % ?
+m.m.sol(sol_id).attach(study_id); % ?
+
+
+% for i=1:nStudySteps
+i = 1;
+fprintf('\t Creating step %d and setting standard parameters...\n',i);
+studyStep_id = sprintf('stationaryStudyStep%d',i);
+compile_id = sprintf('st%d',i);
+variables_id = sprintf('v%d',i);
+solver_id = sprintf('s%d',i);
+store_id = sprintf('su%d',i);
+
+m.m.study(study_id).create(studyStep_id, 'Stationary');
+
+m.m.sol(sol_id).create(compile_id, 'StudyStep');
+m.m.sol(sol_id).create(variables_id, 'Variables');
+m.m.sol(sol_id).create(solver_id, 'Stationary');
+m.m.sol(sol_id).create(store_id, 'StoreSolution');
+
+% set scaling for variables
+m.m.sol(sol_id).feature(variables_id).set('scalemethod','init');
+
+% what do those stand for:
+m.m.study(study_id).feature(studyStep_id).set('initstudyhide', 'on');
+m.m.study(study_id).feature(studyStep_id).set('initsolhide', 'on');
+m.m.study(study_id).feature(studyStep_id).set('solnumhide', 'on');
+m.m.study(study_id).feature(studyStep_id).set('notstudyhide', 'on');
+m.m.study(study_id).feature(studyStep_id).set('notsolhide', 'on');
+m.m.study(study_id).feature(studyStep_id).set('notsolnumhide', 'on');
+
+m.m.study(study_id).feature(studyStep_id).set('mesh', {'geom' 'mappedMesh' 'geom1d' 'nomesh'});
+
+m.m.study(study_id).feature(studyStep_id).set('useparam', useparam);
+m.m.study(study_id).feature(studyStep_id).set('plistarr', plistarr);
+m.m.study(study_id).feature(studyStep_id).set('pname', pname);
+m.m.study(study_id).feature(studyStep_id).set('sweeptype', 'filled');
+m.m.study(study_id).feature(studyStep_id).set('pcontinuationmode', pcontinuationmode);
+m.m.study(study_id).feature(studyStep_id).set('useadvanceddisable', true);
+m.m.study(study_id).feature(studyStep_id).set('showdistribute', true);
+
+
+m.m.sol(sol_id).feature(compile_id).set('studystep', studyStep_id);
+m.m.sol(sol_id).feature(solver_id).set('probesel', 'none');
+m.m.sol(sol_id).feature(solver_id).set('nonlin', 'on');
+m.m.sol(sol_id).feature(solver_id).set('stol', '1e-5');
+
+m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'const');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('niter', '30');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermauto', 'itertol');
+% m.m.sol(sol_id).feature(solver_id).feature('fcDef').set('minsteph', '1.0E-16');
+m.m.sol(sol_id).feature(solver_id).feature('pDef').set('sweeptype', 'filled');
+m.m.sol(sol_id).feature(solver_id).feature('pDef').set('pcontinuationmode', pcontinuationmode);
+m.m.sol(sol_id).feature(solver_id).feature('pDef').set('plistarr', plistarr);
+m.m.sol(sol_id).feature(solver_id).feature('pDef').set('pname', pname); 
+
+% display('Setting individual active physics for step...');
+
+m.m.study(study_id).feature(studyStep_id).set('disabledphysics', {''});
+% m.m.study(study_id).feature(studyStep_id).activate('WeakFormulation', false);
+m.m.study(study_id).feature(studyStep_id).activate('WeakFormulation1d', false);
+m.m.study(study_id).feature(studyStep_id).activate('zeroSurfaceCurrent', false);
+m.m.study(study_id).feature(studyStep_id).activate('zeroNetCurrent0d', false);
+m.m.study(study_id).feature(studyStep_id).activate('zeroNetCurrent1d', false);
+
+m.saveState;
 %% multi-step bpe study
 % nSteps = 5;
 nStudySteps = 5;
