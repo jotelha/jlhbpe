@@ -694,7 +694,7 @@ return
 %% load from server
 m = jlh.BpeModel;
 
-tag = '2016_04_30_14_08_55_Duval2003FaradaicSmall';
+tag = '2016_05_20_13_02_40_Duval2003FaradaicSmall1d';
 
 m.projectName = tag;
 m.projectPath = ['dat\',tag];
