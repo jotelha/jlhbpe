@@ -57,7 +57,7 @@ m.plotsVisible = 'on'; % 'off' stores plots, but does not show them as pop ups
 
 
 % environment and physical constants
-m.epsilon_r = constants.RelativePermittivityOfWater; % relative permittivity of electrolyte, here water
+m.epsilon_r = Constants.RelativePermittivityOfWater; % relative permittivity of electrolyte, here water
 
 m.T = 298.15; % K, equivalent to 25 deg C
 

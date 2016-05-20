@@ -1,5 +1,6 @@
  import com.comsol.model.*
  import com.comsol.model.util.*
+ import jlh.*
     
  %%
 m = jlh.BpeModel;

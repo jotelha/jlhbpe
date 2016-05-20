@@ -567,6 +567,7 @@ classdef BpeModel < handle
         
         function e = get.domainExpressions1d(obj)
             import jlh.*;
+            import jlh.hf.*;
             logc = prepTerm('log(c_id)','c_id',obj.c_id);
             cx = prepTerm('c_idx','c_id',obj.c_id);
             C = prepTerm('c_id*c_ref','c_id',obj.c_id);
