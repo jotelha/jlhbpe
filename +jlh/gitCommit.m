@@ -3,5 +3,5 @@ function gitCommit(msg)
     %system('git add img/*','-echo');
     %system('git add dat/*','-echo');
     %system('git add TODO','-echo');
-    system(['git commit -u -m "',msg,'"'],'-echo');
+    system(['git commit -a -m "',msg,'"'],'-echo');
 end

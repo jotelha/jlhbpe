@@ -11,3 +11,16 @@
 
 # Compiled MEX binaries (all platforms)
 *.mex*
+
+# MATLAB data file
+*.mat
+
+# Pictures
+*.png
+*.jpg
+
+# COMSOL models
+*.mph
+
+# log file
+*.log
