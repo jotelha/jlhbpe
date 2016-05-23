@@ -7,7 +7,7 @@ function obj = updateMappedMesh(obj)
     fprintf('  Setting mesh parameters...\n');
 
      % get mesh refinement from parameters
-    obj.mesh1D();
+%     obj.mesh1D();
 
     a0 = obj.intFirstDebyeLength(1);
     r = obj.intFirstDebyeLength(2)/obj.intFirstDebyeLength(1);

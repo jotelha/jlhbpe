@@ -359,7 +359,8 @@ obj.m.geom('geom').create('unitCellPrototypeUpperDomain', 'BoxSelection');
 obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').label('unitCellPrototypeUpperDomain');
 obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('xmin', '-w_bpe/2+3*w_mesh/2');
 obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('xmax', '-w_bpe/2+3*w_mesh/2');
-obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('ymin', 'epsilon/2+1/2');
+% obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('ymin', 'epsilon/2+1/2');
+obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('ymin', '3*epsilon/2'); % to include extended BC
 obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('ymax', 'epsilon/2+1/2');
 obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('condition', 'intersects');
 % obj.m.geom('geom').feature('unitCellPrototypeUpperDomain').set('contributeto', 'unitCellPrototypeCumulative');

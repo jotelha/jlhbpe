@@ -1,5 +1,5 @@
 modelTags = ModelUtil.tags;
-for i = numel(modelTags)
+for i = 1:numel(modelTags)
     ModelUtil.remove(modelTags(i));
 end
 ModelUtil.clear;

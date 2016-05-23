@@ -1,16 +1,28 @@
  import com.comsol.model.*
  import com.comsol.model.util.*
  import jlh.*
+ import jlh.hf.*
     
  %%
 m = jlh.BpeModel;
 m.newProject('Duval2003FaradaicSmall1d');
 %% also necessary to execute when loading
+
+spawn = strrep('G:\scripts\launchers\spawn.bat','\','\\');
+mTail = strrep('G:\scripts\mtail\mTail.exe','\','\\');
+
 % server log file
 logFile = [pwd(),'\',m.projectPath,'\comsol.log'];
 % fclose(fopen(logFile, 'w'));
 ModelUtil.showProgress(logFile);
-system(sprintf('G:\\scripts\\mtail\\mTail.exe "%s" /start &',logFile));
+logFileArg = strrep(logFile,'\','\\');
+
+% system(sprintf('G:\\scripts\\mtail\\mTail.exe "%s" /start &',logFile));
+cmd = prepTerm('spawn mTail "logFile" /start','spawn','mTail','logFile',spawn,mTail,logFileArg);
+% spawn helper script yields logger pid
+[status,cmdout] = system(cmd{1},'-echo');
+loggerPid = str2double(cmdout);
+
 
 % m.setDhopeshwarkar2008ElectrokineticsCaseParameters;
 
@@ -213,7 +225,8 @@ return;
 
 % mapped mesh
 m.m.disableUpdates(false); % necessary before meshing
-m.hMaxFactor = 1;
+m.hMaxFactor = 0.8;
+m.mesh1D();
 m.createMappedMesh();
 m.updateMappedMesh();
 m.replicateMappedMeshPrototype;
