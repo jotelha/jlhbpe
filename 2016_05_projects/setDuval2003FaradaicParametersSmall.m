@@ -70,7 +70,7 @@ m.D       = [DH3Op,DOHm,DKp,DNO3m]; % diffusivity of solute species
 m.epsilon     = 0.01; % relation Debye length : simulation domain, lambdaD / L
 m.delta       = 0.1; % relation width of Stern layer : Debye length, lambdaS / lambdaD
 
-Wbpe  = 0.5e-3; % 500mu m
+Wbpe  = 0.5e-3/100; % 500mu m
 Wgap  = 0.5e-3/100; %0.5mm / 10000
 
 m.wMeshRatio = 10; % desired ratio between w_mesh and l (l=1)   

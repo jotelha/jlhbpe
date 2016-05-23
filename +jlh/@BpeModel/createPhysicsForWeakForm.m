@@ -27,6 +27,9 @@ function obj = createPhysicsForWeakForm(obj)
     obj.m.physics('WeakFormulation').create('SurfaceChargeDensityBC', 'WeakContribution', 1);
     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').label('SurfaceChargeDensityBC');
 
+    % Identity pair continuity
+    obj.m.physics('WeakFormulation').create('zetaPlaneContinuity', 'Continuity', 1);
+
     obj.zeroSurfaceCurrent = obj.m.physics.create('zeroSurfaceCurrent', 'GlobalEquations', 'geom');
     obj.zeroSurfaceCurrentEquation = obj.zeroSurfaceCurrent.create('zeroSurfaceCurrentEquation', 'GlobalEquations');
 end

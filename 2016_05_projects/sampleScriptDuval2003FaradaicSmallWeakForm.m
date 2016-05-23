@@ -5,7 +5,7 @@
     
  %%
 m = jlh.BpeModel;
-m.newProject('Duval2003FaradaicSmall1d');
+m.newProject('Duval2003FaradaicSmallAssembly');
 %% also necessary to execute when loading
 
 spawn = strrep('G:\scripts\launchers\spawn.bat','\','\\');

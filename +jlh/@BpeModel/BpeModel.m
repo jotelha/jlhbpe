@@ -612,6 +612,17 @@ classdef BpeModel < handle
         function f = makeFileName(obj,n)
             f = [obj.projectPath,'/',n];
         end
+        
+        function ap = getIdentityPairsForComponent(obj, component) 
+            pairTags = obj.m.pair.tags;
+            ap = {};
+            for j=1:numel(pairTags)
+                c = char(obj.m.pair(pairTags(j)).model);
+                if strcmp(c,component)
+                    ap = [ap, char(pairTags(j))];
+                end
+            end
+        end
     
         obj = prepareIdentifiers(obj)
         obj = createModel(obj)

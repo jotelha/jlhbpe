@@ -387,9 +387,14 @@ function obj = updatePhysicsForWeakForm(obj)
     obj.m.physics('WeakFormulation1d').feature('wfeq1').set('weak', wEquations1d);
     
     % assembly continuity
-    obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', 'ap1', 0);
-    obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', 'ap2', 1);
-  
+     % Identity pair continuity
+    ap = obj.getIdentityPairsForComponent('comp1d');
+    for i = 1:numel(ap)
+        obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', ap{i}, i-1);
+    end
+%     obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', 'ap1', 0);
+%     obj.m.physics('WeakFormulation1d').feature('assemblyContinuity1d').setIndex('pairs', 'ap2', 1);
+%   
     % Nernst Planck
     for i=1:obj.numberOfSpecies
         % initial values
@@ -714,6 +719,12 @@ function obj = updatePhysicsForWeakForm(obj)
     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').selection.named('geom_bpeSurface');
     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').set('weakExpression',wSurfaceChargeDensityBC);
 
+    
+    % Identity pair continuity
+    ap = obj.getIdentityPairsForComponent('comp1');
+    for i = 1:numel(ap)
+        obj.m.physics('WeakFormulation').feature('zetaPlaneContinuity').setIndex('pairs', ap{i}, i-1);
+    end
 
 
 %     %% Nernst Planck equations

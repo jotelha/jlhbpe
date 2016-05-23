@@ -262,22 +262,55 @@ obj.m.geom('geom').feature('westwardThinningOuter').set('createselection', 'on')
 obj.m.geom('geom').feature('westwardThinningOuter').set('size', {'epsilon' 'epsilon'});
 obj.m.geom('geom').feature('westwardThinningOuter').set('pos', {'w_bpe/2' '0'});
 
-% union of all domains
-obj.m.geom('geom').create('domainUnion', 'UnionSelection');
-obj.m.geom('geom').feature('domainUnion').set('entitydim', '-1'); % object
-obj.m.geom('geom').feature('domainUnion').label('domainUnion');
-obj.m.geom('geom').feature('domainUnion').set('input', {'meshChopArrayCumulative',...
-    'gapLeftSelection','gapRightSelection',...
-    'westwardThinningCumulative','eastwardThinningCumulative'});
-% obj.m.geom('geom').feature('domainUnion').set('contributeto', 'domainUnionCumulative');
+% % union of all domains
+% obj.m.geom('geom').create('domainUnion', 'UnionSelection');
+% obj.m.geom('geom').feature('domainUnion').set('entitydim', '-1'); % object
+% obj.m.geom('geom').feature('domainUnion').label('domainUnion');
+% obj.m.geom('geom').feature('domainUnion').set('input', {'meshChopArrayCumulative',...
+%     'gapLeftSelection','gapRightSelection',...
+%     'westwardThinningCumulative','eastwardThinningCumulative'});
+% % obj.m.geom('geom').feature('domainUnion').set('contributeto', 'domainUnionCumulative');
+% 
+% 
+% obj.m.geom('geom').create('uniteDomains','Union');
+% % % obj.m.geom('geom').feature('uniteDomains').set('entitydim', '2');
+% obj.m.geom('geom').feature('uniteDomains').selection('input').named('domainUnion');
+% % %     'gapLeftSelection','gapRightSelection',...
+% % %     'westwardThinningCumulative','eastwardThinningCumulative'});
+% % obj.m.geom('geom').feature('uniteDomains').('meshChopArray');
 
+% unions and assemblies
+obj.m.geom('geom').create('allSelection', 'BoxSelection');
+obj.m.geom('geom').feature('allSelection').set('entitydim', '-1');
+obj.m.geom('geom').feature('allSelection').label('allSelection');
 
-obj.m.geom('geom').create('uniteDomains','Union');
-% % obj.m.geom('geom').feature('uniteDomains').set('entitydim', '2');
-obj.m.geom('geom').feature('uniteDomains').selection('input').named('domainUnion');
-% %     'gapLeftSelection','gapRightSelection',...
-% %     'westwardThinningCumulative','eastwardThinningCumulative'});
-% obj.m.geom('geom').feature('uniteDomains').('meshChopArray');
+obj.m.geom('geom').create('ddlSelection', 'UnionSelection');
+obj.m.geom('geom').feature('ddlSelection').set('entitydim', '-1');
+obj.m.geom('geom').feature('ddlSelection').label('dllSelection');
+obj.m.geom('geom').feature('ddlSelection').set('input', {'westwardThinningOuter' 'eastwardThinningOuter' ...
+    'westwardThinningInner' 'eastwardThinningInner' 'ddl'});
+
+obj.m.geom('geom').create('ddlUnion', 'Union');
+obj.m.geom('geom').feature('ddlUnion').label('ddlUnion');
+obj.m.geom('geom').feature('ddlUnion').set('selresult', 'on');
+obj.m.geom('geom').feature('ddlUnion').selection('input').named('ddlSelection');
+
+obj.m.geom('geom').create('allExceptDdl', 'Difference');
+obj.m.geom('geom').feature('allExceptDdl').label('allExceptDdl');
+obj.m.geom('geom').feature('allExceptDdl').set('keep', true);
+obj.m.geom('geom').feature('allExceptDdl').set('selresult', 'on');
+obj.m.geom('geom').feature('allExceptDdl').selection('input').named('allSelection');
+obj.m.geom('geom').feature('allExceptDdl').selection('input2').named('ddlUnion');
+
+obj.m.geom('geom').create('toDelete', 'DifferenceSelection');
+obj.m.geom('geom').feature('toDelete').set('entitydim', '-1');
+obj.m.geom('geom').feature('toDelete').label('toDelete');
+obj.m.geom('geom').feature('toDelete').set('add', {'allSelection'});
+obj.m.geom('geom').feature('toDelete').set('subtract', {'allExceptDdl' 'ddlUnion'});
+
+obj.m.geom('geom').create('delete', 'Delete');
+obj.m.geom('geom').feature('delete').selection('input').init;
+obj.m.geom('geom').feature('delete').selection('input').named('toDelete');
 
 % points
 obj.m.geom('geom').create('leftBoundaryOfZetaPlanePoint', 'Point');
@@ -518,6 +551,7 @@ obj.m.geom('geom').feature('triangularMeshDomainsAtEnds').set('input', {...
 
 
 obj.m.geom('geom').feature('fin').set('repairtol', '1e-10');
+obj.m.geom('geom').feature('fin').set('action', 'assembly');
 obj.m.geom('geom').run;
 % obj.ddl = obj.m.geom('geom').feature('ddl');
 % obj.m.selection('leftBoundaryOfSurface') = obj.m.geom('geom').feature('leftBoundaryOfSurface');
