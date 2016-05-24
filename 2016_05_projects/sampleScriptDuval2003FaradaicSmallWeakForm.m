@@ -58,6 +58,9 @@ m.createMesh();
 m.createProbes();
 m.create1dPlots();
 m.create2dPlots();
+
+m.m.result.export.create('dataExporter', 'Data');
+
 m.standardView = m.m.view.create('standardView', 'geom');
 m.ddlView      = m.m.view.create('ddlView', 'geom');
 m.createDatasets();
@@ -93,13 +96,13 @@ m.m.disableUpdates(false); % necessary before meshing
 m.saveState;
 
 %% meshing for 1d component
-m.hMaxFactor = 0.01;
+m.hMaxFactor = 0.05;
 m.mesh1D;
 m.update1dMesh();
 
 m.saveState;
 %% study for 1d component
-sweepParameterValues = {-0.28210*m.UT};
+sweepParameterValues = {-0.28210/m.UT};
 pname = {'phi_bpe_init'};
 plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
 punit = '';
@@ -207,6 +210,13 @@ dset = char(solInfo.dataset(2));
 
 m.updateFluxEvaluations1d(dset);
 
+txtFileName = m.exportSolution1d(dset);
+m.m.func('interpSolution1d').set('filename', txtFileName);
+m.m.func('interpSolution1d').set('nargs', '1');
+m.m.func('interpSolution1d').active(true);
+
+
+
 %% 
 % m.updateEvaluations1d(dset);
 m.plot1dSolution(dset);
@@ -225,8 +235,8 @@ return;
 
 % mapped mesh
 m.m.disableUpdates(false); % necessary before meshing
-m.hMaxFactor = 0.8;
-m.mesh1D();
+% m.hMaxFactor = 0.8;
+% m.mesh1D();
 m.createMappedMesh();
 m.updateMappedMesh();
 m.replicateMappedMeshPrototype;

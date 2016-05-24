@@ -62,5 +62,16 @@ function obj = updateFunctions(obj)
     obj.m.func('smoothenBpeBC').set('smooth', 'epsilon*smootheningFactor');
     obj.m.func('smoothenBpeBC').set('funcname', 'smoothenBpeBC');
     obj.m.func('smoothenBpeBC').set('lower', '-w_bpe/2');
+    
+    % 1d solution interpolation
+    obj.m.func('interpSolution1d').set('source', 'file');
+    obj.m.func('interpSolution1d').label('interpSolution1d');
+%     obj.m.func('int1').set('filename', 'G:\\johnny\\matlab\\jlhbpe\\2016_05_projects\\dat\\2016_05_24_16_32_45_Duval2003FaradaicSmallAssembly\\solution1d\\dset4\\solution1d.txt');
+    obj.m.func('interpSolution1d').set('nargs', '1');
+    obj.m.func('interpSolution1d').setIndex('funcs', 'phiInterpolation', 0, 0);
+    for i = 1:obj.numberOfSpecies
+        obj.m.func('interpSolution1d').setIndex('funcs', obj.cInterpolation_id{i}, i, 0);
+        obj.m.func('interpSolution1d').setIndex('funcs', num2str(i+1), i, 1);
+    end
 
-end
+    end

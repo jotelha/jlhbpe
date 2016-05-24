@@ -154,11 +154,13 @@ function obj = updateMappedMesh(obj)
     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').selection.geom('geom', 1); % what does this mean?
     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').selection.named('geom_eastwardThinningEdges');
     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').label('eastwardThinningDistribution');
-    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('type','predefined');
-    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('method', 'geometric');
-    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('elemcount', num2str(N));
-    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('elemratio', num2str(R));
-    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('reverse', 'off');
+%     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('type','predefined');
+%     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('method', 'geometric');
+%     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('elemcount', num2str(N));
+%     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('elemratio', num2str(R));
+%     obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('reverse', 'off');
+    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('type','explicit');
+    obj.m.mesh('mappedMesh').feature('eastwardThinningEdges').feature('eastwardThinningDistribution').set('explicit', obj.distributionFirstDebyeLengthStr);
 
     obj.m.mesh('mappedMesh').feature('westwardThinningEdges').selection.geom('geom',1);
     obj.m.mesh('mappedMesh').feature('westwardThinningEdges').selection.named('geom_westwardThinningEdges');
@@ -182,7 +184,7 @@ function obj = updateMappedMesh(obj)
     obj.m.mesh('mappedMesh').feature('lateralThinningEdges').feature('lateralThinningDistribution').set('method', 'geometric');
     obj.m.mesh('mappedMesh').feature('lateralThinningEdges').feature('lateralThinningDistribution').set('elemcount', num2str(N));
     obj.m.mesh('mappedMesh').feature('lateralThinningEdges').feature('lateralThinningDistribution').set('elemratio', num2str(R));
-    obj.m.mesh('mappedMesh').feature('lateralThinningEdges').feature('lateralThinningDistribution').set('reverse', 'on');
+    obj.m.mesh('mappedMesh').feature('lateralThinningEdges').feature('lateralThinningDistribution').set('reverse', 'off');
     
     % corrected edge vertex distribution at ends of bpe
     obj.m.mesh('mappedMesh').feature('edgeAtBpeSurfaceAtBpeEnds').selection.geom('geom',1);

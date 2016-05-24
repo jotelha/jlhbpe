@@ -285,9 +285,12 @@ function obj = updatePhysicsForWeakForm(obj)
     kappaSummand = prepTerm('z_id^2*c_id*D_id','z_id','c_id','D_id',obj.z_id,obj.c_id,obj.D_id);
     kappaTerm    = ['F_const/RT*(',strcat(strjoin(kappaSummand','+' )),')'];
 
-    c0Term = prepTerm('c_bulk_id/c_ref','c_bulk_id',obj.c_bulk_id);
+%     c0Term = prepTerm('c_bulk_id/c_ref','c_bulk_id',obj.c_bulk_id);
+    c0Term = prepTerm('smoothenBpeBC(x)*cInterpolation_id(y)','cInterpolation_id',obj.cInterpolation_id);
+
 %     phi0Term = '0';
-    phi0Term = '-deltaPhi*x/w';
+%     phi0Term = '-deltaPhi*x/w';
+    phi0Term = 'smoothenBpeBC(x)*phiInterpolation(y)';
     
     %% 0d component
     obj.m.variable('var0d').set('i_total', totalCurrent);

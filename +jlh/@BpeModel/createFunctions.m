@@ -19,4 +19,7 @@ function createFunctions(obj)
     end
     
     obj.m.func.create('smoothenBpeBC', 'Rectangle');
+    
+    obj.m.func.create('interpSolution1d', 'Interpolation');
+    obj.m.func('interpSolution1d').active(false);
 end

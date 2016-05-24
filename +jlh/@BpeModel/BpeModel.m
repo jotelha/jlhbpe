@@ -731,7 +731,7 @@ classdef BpeModel < handle
         obj = plot1dSolution(obj,dset,dsetFolder);
         obj = plot1dSolutionSurfaceParametric(obj,dset,par,dsetFolder);
         obj = evaluate1dSolution(obj,dset,dsetFolder);
-       
+        txtFileName = exportSolution1d(obj,dset,dsetFolder);
         
         function obj = savePlot(obj,f,fileName,nRows,nCols)
             if isempty(obj.projectPath)

@@ -330,9 +330,18 @@ obj.m.geom('geom').feature('rightBoundaryOfZetaPlane').label('rightBoundaryOfZet
 obj.m.geom('geom').feature('rightBoundaryOfZetaPlane').selection('selection').init(0);
 obj.m.geom('geom').feature('rightBoundaryOfZetaPlane').selection('selection').set('rightBoundaryOfZetaPlanePoint(1)', [1]);
 obj.insulatorAdjacentToBpe = obj.m.geom('geom').create('insulatorAdjacentToBpe', 'DifferenceSelection');
+
+% selections
+obj.m.geom('geom').create('entireSurface', 'BoxSelection');
+obj.m.geom('geom').feature('entireSurface').label('entireSurface');
+obj.m.geom('geom').feature('entireSurface').set('entitydim', '1');
+obj.m.geom('geom').feature('entireSurface').set('ymin', '-epsilon/2');
+obj.m.geom('geom').feature('entireSurface').set('ymax', 'epsilon/2');
+obj.m.geom('geom').feature('entireSurface').set('condition', 'inside');
+
 obj.m.geom('geom').feature('insulatorAdjacentToBpe').set('entitydim', '1');
 obj.m.geom('geom').feature('insulatorAdjacentToBpe').label('insulatorAdjacentToBpe');
-obj.m.geom('geom').feature('insulatorAdjacentToBpe').set('add', {'entireSurfaceCumulative'});
+obj.m.geom('geom').feature('insulatorAdjacentToBpe').set('add', {'entireSurface'});
 obj.m.geom('geom').feature('insulatorAdjacentToBpe').set('subtract', {'bpeSurfaceCumulative'});
 obj.lateralBoundary = obj.m.geom('geom').create('lateralBoundary', 'UnionSelection');
 obj.m.geom('geom').feature('lateralBoundary').set('entitydim', '1');
@@ -363,10 +372,10 @@ obj.zetaPlane = obj.m.geom('geom').create('zetaPlane', 'UnionSelection');
 obj.m.geom('geom').feature('zetaPlane').set('entitydim', '1');
 obj.m.geom('geom').feature('zetaPlane').label('zetaPlane');
 obj.m.geom('geom').feature('zetaPlane').set('input', {'zetaPlaneCumulative'});
-obj.entireSurface = obj.m.geom('geom').create('entireSurface', 'UnionSelection');
-obj.m.geom('geom').feature('entireSurface').set('entitydim', '1');
-obj.m.geom('geom').feature('entireSurface').label('entireSurface');
-obj.m.geom('geom').feature('entireSurface').set('input', {'entireSurfaceCumulative'});
+% obj.entireSurface = obj.m.geom('geom').create('entireSurface', 'UnionSelection');
+% obj.m.geom('geom').feature('entireSurface').set('entitydim', '1');
+% obj.m.geom('geom').feature('entireSurface').label('entireSurface');
+% obj.m.geom('geom').feature('entireSurface').set('input', {'entireSurfaceCumulative'});
 obj.upperBoundary = obj.m.geom('geom').create('upperBoundary', 'UnionSelection');
 obj.m.geom('geom').feature('upperBoundary').set('entitydim', '1');
 obj.m.geom('geom').feature('upperBoundary').label('upperBoundary');
@@ -477,19 +486,19 @@ obj.m.geom('geom').create('westwardThinningEdges', 'DifferenceSelection');
 obj.m.geom('geom').feature('westwardThinningEdges').label('westwardThinningEdges');
 obj.m.geom('geom').feature('westwardThinningEdges').set('entitydim', '1');
 obj.m.geom('geom').feature('westwardThinningEdges').set('add', {'westwardThinningCumulative'});
-obj.m.geom('geom').feature('westwardThinningEdges').set('subtract', {'boundariesAdjacentToEntireSurface'});
+obj.m.geom('geom').feature('westwardThinningEdges').set('subtract', {'boundariesAdjacentToEntireSurface', 'allExceptDdl'});
 
 obj.m.geom('geom').create('eastwardThinningEdges', 'DifferenceSelection');
 obj.m.geom('geom').feature('eastwardThinningEdges').label('eastwardThinningEdges');
 obj.m.geom('geom').feature('eastwardThinningEdges').set('entitydim', '1');
 obj.m.geom('geom').feature('eastwardThinningEdges').set('add', {'eastwardThinningCumulative'});
-obj.m.geom('geom').feature('eastwardThinningEdges').set('subtract', {'boundariesAdjacentToEntireSurface'});
+obj.m.geom('geom').feature('eastwardThinningEdges').set('subtract', {'boundariesAdjacentToEntireSurface', 'allExceptDdl'});
 
 obj.m.geom('geom').create('lateralThinningEdges', 'DifferenceSelection');
 obj.m.geom('geom').feature('lateralThinningEdges').label('lateralThinningEdges');
 obj.m.geom('geom').feature('lateralThinningEdges').set('entitydim', '1');
 obj.m.geom('geom').feature('lateralThinningEdges').set('add', {'eastwardThinningCumulative','westwardThinningCumulative'});
-obj.m.geom('geom').feature('lateralThinningEdges').set('subtract', {'eastwardThinningEdges','westwardThinningEdges'});
+obj.m.geom('geom').feature('lateralThinningEdges').set('subtract', {'eastwardThinningEdges','westwardThinningEdges', 'allExceptDdl'});
 
 % meshing domain selections
 % obj.m.geom('geom').selection.create('gapLeftSelection', 'CumulativeSelection');
@@ -590,5 +599,13 @@ obj.m.selection('rightBoundaryOfZetaPlane').set('xmin', 'w_bpe/2+w_bulkRight');
 obj.m.selection('rightBoundaryOfZetaPlane').set('xmax', 'w_bpe/2+w_bulkRight');
 obj.m.selection('rightBoundaryOfZetaPlane').set('ymin', 'epsilon');
 obj.m.selection('rightBoundaryOfZetaPlane').set('ymax', 'epsilon');
+
+%% swap identity pair. source: fine mesh, destination: coarse mesh
+ap = obj.getIdentityPairsForComponent('comp1');
+for i = 1:numel(ap)
+    obj.m.pair(ap{i}).swap();
+end
+
+
     
 end

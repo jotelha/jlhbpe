@@ -58,6 +58,19 @@ function createEvaluations1d(obj)
         obj.m.result.numerical(lBulk).set('expr',de{i});
         obj.m.result.numerical(lBulk).set('table','bulkExitEvaluationTable1d');
 %         obj.m.result.numerical(lBulk).selection.named('surfaceVertex1d');
+
+        % averages
+        lAverage = sprintf('%s_av',dl{i});
+        obj.m.result.numerical.create(lAverage, 'AvLine');
+        obj.m.result.numerical(lAverage).label(lAverage);
+%         obj.m.result.numerical(lAverage).selection.all;
+        obj.m.result.numerical(lAverage).set('expr',de{i});
+%         obj.m.result.numerical(lAverage).set('table','bulkExitEvaluationTable1d');
+        lDdlAverage = sprintf('%s_ddlAv',dl{i});
+        obj.m.result.numerical.create(lDdlAverage, 'AvLine');
+        obj.m.result.numerical(lDdlAverage).label(lDdlAverage);
+%         obj.m.result.numerical(lDdlAverage).selection.named('geom1d_ddl1dCumulative_dom');
+        obj.m.result.numerical(lDdlAverage).set('expr',de{i});
     end
     for i = 1:numel(se)
         obj.m.result.numerical.create(sl{i}, 'EvalPoint');

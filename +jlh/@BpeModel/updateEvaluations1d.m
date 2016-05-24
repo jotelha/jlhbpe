@@ -51,6 +51,30 @@ function updateEvaluations1d(obj,dset,eval,table_id)
                 obj.m.result.numerical(lBulk).appendResult;
             end
         end
+        
+        lAverage = sprintf('%s_av',dl{i});
+        if( any(strcmp(eval,'all')) || any(strcmp(dl{i},eval)))
+            obj.m.result.numerical(lAverage).set('data',dset);
+            obj.m.result.numerical(lAverage).selection.all;
+            obj.m.result.numerical(lAverage).set('table',table_id);
+            if(obj.m.result.table(table_id).getNRows == 0)
+                obj.m.result.numerical(lAverage).setResult;
+            else
+                obj.m.result.numerical(lAverage).appendResult;
+            end
+        end
+        
+        lDdlAverage = sprintf('%s_ddlAv',dl{i});
+        if( any(strcmp(eval,'all')) || any(strcmp(dl{i},eval)))
+            obj.m.result.numerical(lDdlAverage).set('data',dset);
+            obj.m.result.numerical(lDdlAverage).selection.named('geom1d_ddl1dCumulative_dom');
+            obj.m.result.numerical(lDdlAverage).set('table',table_id);
+            if(obj.m.result.table(table_id).getNRows == 0)
+                obj.m.result.numerical(lDdlAverage).setResult;
+            else
+                obj.m.result.numerical(lDdlAverage).appendResult;
+            end
+        end
     end
     for i = 1:numel(se)
         if( any(strcmp(eval,'all')) || any(strcmp(sl{i},eval)))

@@ -98,11 +98,7 @@ function obj = updateParameters(obj)
     obj.m.param.set('nMeshChops', obj.nMeshChops, 'No of mesh chops on BPE');
     obj.m.param.set('nSegmentsPerChop', obj.nSegmentsPerChop, 'No of surface segments per chop');
     obj.m.param.set('extendedDdlFactor', obj.extendedDdlFactor, 'How many debye lengths should mesh refinemend stretch beyond DDL');
-
-    
-
-
-    
+   
     obj.m.param.set('L', lengthL, 'Cell depth');
     
     obj.m.param.set('lambdaD', debyeLengthTerm, 'Debye length');
@@ -181,7 +177,7 @@ function obj = updateParameters(obj)
 
     
     % smoothen Bpe BC factor
-    obj.m.param.set('smootheningFactor', 10);
+    obj.m.param.set('smootheningFactor', 1);
 
             
 end
