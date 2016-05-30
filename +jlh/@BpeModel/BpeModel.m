@@ -634,6 +634,7 @@ classdef BpeModel < handle
         create0dComponent(obj)
         
         obj = makeChoppedGeometry(obj)
+        obj = makeSimpleGeometry(obj)
         
         obj = updateModel(obj)
         
@@ -650,6 +651,10 @@ classdef BpeModel < handle
         obj = createMappedMesh(obj);
         obj = updateMappedMesh(obj);
         obj = finalizeMappedMesh(obj);
+        
+        obj = createMappedMeshForSimpleGeometry(obj);
+        obj = updateMappedMeshForSimpleGeometry(obj);
+
         
         obj = updateChoppedMesh(obj)
         obj = replicateMeshPrototype(obj)

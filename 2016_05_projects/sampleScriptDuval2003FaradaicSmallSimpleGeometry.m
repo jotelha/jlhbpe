@@ -46,7 +46,8 @@ m.m.disableUpdates(true); % try whether speed can be increased
 m.createFunctions()
 m.m.modelNode.create(m.comp_id); 
 m.updateParameters();
-m.makeChoppedGeometry();
+% m.makeChoppedGeometry();
+m.makeSimpleGeometry();
 
 %% 
 % m.createGeometry();
@@ -96,13 +97,16 @@ m.m.disableUpdates(false); % necessary before meshing
 m.saveState;
 
 %% meshing for 1d component
-m.hMaxFactor = 0.05;
+m.hMaxFactor = 0.01;
 m.mesh1D;
 m.update1dMesh();
 
 m.saveState;
 %% study for 1d component
-sweepPhiInitValues = {-0.28210/m.UT};
+% sweepPhiInitValues = {-0.28210/m.UT};
+
+sweepPhiInitValues = {-0.01/m.UT};
+
 pname = {'phi_bpe_init','surfaceFluxRampFactor'};
 plistarr = [ cellstr( cellfun(@(c) num2str(c), sweepPhiInitValues,'UniformOutput',false)), '0'];
 punit = '';
@@ -219,7 +223,7 @@ m.m.func('interpSolution1d').active(true);
 
 %% 
 % m.updateEvaluations1d(dset);
-% m.plot1dSolution(dset);
+m.plot1dSolution(dset);
 
 % return;
 
@@ -235,12 +239,10 @@ m.m.func('interpSolution1d').active(true);
 
 % mapped mesh
 m.m.disableUpdates(false); % necessary before meshing
-% m.hMaxFactor = 0.8;
-% m.mesh1D();
-m.createMappedMesh();
-m.updateMappedMesh();
-m.replicateMappedMeshPrototype;
-% m.finalizeMappedMesh;
+m.hMaxFactor = 0.5;
+m.mesh1D();
+m.createMappedMeshForSimpleGeometry();
+m.updateMappedMeshForSimpleGeometry();
 m.m.mesh('mappedMesh').run;
 m.saveState;
 m.m.disableUpdates(true); 
@@ -251,9 +253,15 @@ m.m.disableUpdates(true);
 % N = ceil(log(1-m.epsilon/a*(1-r))/log(r));
 
 %% single-step bpe study, 2d
-sweepParameterValues = {-0.28210/m.UT};
-pname = {'phi_bpe_init'};
-plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
+% sweepParameterValues = {-0.28210/m.UT};
+
+sweepParameterValues = {-0.01/m.UT};
+
+pname = {'phi_bpe_init','surfaceFluxRampFactor', 'deltaPhi'};
+% plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
+% pname = {'phi_bpe_init','surfaceFluxRampFactor'};
+plistarr = [ cellstr( cellfun(@(c) num2str(c), sweepPhiInitValues,'UniformOutput',false)), '0', '0'];
+
 punit = '';
 useparam = 'on';
 pcontinuationmode = 'no';

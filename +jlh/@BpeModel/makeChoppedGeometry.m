@@ -329,7 +329,6 @@ obj.rightBoundaryOfZetaPlane = obj.m.geom('geom').create('rightBoundaryOfZetaPla
 obj.m.geom('geom').feature('rightBoundaryOfZetaPlane').label('rightBoundaryOfZetaPlane');
 obj.m.geom('geom').feature('rightBoundaryOfZetaPlane').selection('selection').init(0);
 obj.m.geom('geom').feature('rightBoundaryOfZetaPlane').selection('selection').set('rightBoundaryOfZetaPlanePoint(1)', [1]);
-obj.insulatorAdjacentToBpe = obj.m.geom('geom').create('insulatorAdjacentToBpe', 'DifferenceSelection');
 
 % selections
 obj.m.geom('geom').create('entireSurface', 'BoxSelection');
@@ -339,6 +338,7 @@ obj.m.geom('geom').feature('entireSurface').set('ymin', '-epsilon/2');
 obj.m.geom('geom').feature('entireSurface').set('ymax', 'epsilon/2');
 obj.m.geom('geom').feature('entireSurface').set('condition', 'inside');
 
+obj.insulatorAdjacentToBpe = obj.m.geom('geom').create('insulatorAdjacentToBpe', 'DifferenceSelection');
 obj.m.geom('geom').feature('insulatorAdjacentToBpe').set('entitydim', '1');
 obj.m.geom('geom').feature('insulatorAdjacentToBpe').label('insulatorAdjacentToBpe');
 obj.m.geom('geom').feature('insulatorAdjacentToBpe').set('add', {'entireSurface'});

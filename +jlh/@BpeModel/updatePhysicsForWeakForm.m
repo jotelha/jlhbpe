@@ -286,7 +286,7 @@ function obj = updatePhysicsForWeakForm(obj)
     kappaTerm    = ['F_const/RT*(',strcat(strjoin(kappaSummand','+' )),')'];
 
 %     c0Term = prepTerm('c_bulk_id/c_ref','c_bulk_id',obj.c_bulk_id);
-    c0Term = prepTerm('smoothenBpeBC(x)*cInterpolation_id(y)','cInterpolation_id',obj.cInterpolation_id);
+    c0Term = prepTerm('c_bulk_id/c_ref+smoothenBpeBC(x)*(cInterpolation_id(y)-c_bulk_id/c_ref)','cInterpolation_id','c_bulk_id',obj.cInterpolation_id,obj.c_bulk_id);
 
 %     phi0Term = '0';
 %     phi0Term = '-deltaPhi*x/w';
@@ -541,12 +541,20 @@ function obj = updatePhysicsForWeakForm(obj)
     
     wSurfaceFluxBC              = prepTerm('surfaceFluxRampFactor*smoothenBpeBC(x)*NN_id*test(c_id)','NN_id','c_id',obj.N_dimless_id,obj.c_id);
     %wNPBuFluxBC     = prepTerm('NN_id*test(c_id)',{'NN_id','c_id'},{obj.NN_id,obj.c_id});
-    wSurfaceChargeDensityBC     = '-chargeDensityRampFactor*epsilon/delta*(phi-phi_s)*test(phi)';
+    wSurfaceChargeDensityBC     = '-smoothenBpeBC(x)*chargeDensityRampFactor*epsilon/delta*(phi-phi_s)*test(phi)';
     
     
-    wBulkConcentrationBC        = prepTerm('-lambdaCBulk_id*test(c_id)-test(lambdaCBulk_id)*(c_id-c_id_0)','lambdaCBulk_id','c_id',obj.lambdaCBulk_id,obj.c_id);
+%     wBulkConcentrationBC        = prepTerm('-lambdaCBulk_id*test(c_id)-test(lambdaCBulk_id)*(c_id-c_id_0)','lambdaCBulk_id','c_id',obj.lambdaCBulk_id,obj.c_id);
 %     wBulkPotentialBC            = '-lambdaPhiBulkExit*test(phi)-test(lambdaPhiBulkExit)*phi';
-    wElectrodePotentialBC       = '-lambdaPhiElectrode*test(phi)-test(lambdaPhiElectrode)*(phi-phi_s)';
+%     wElectrodePotentialBC       = '-lambdaPhiElectrode*test(phi)-test(lambdaPhiElectrode)*(phi-phi_s)';
+
+    % for pointwise constraints:
+    wConstraintExpressionBulkConcentrationBC   = prepTerm('c_id-c_id_0','c_id',obj.c_id);
+    wConstraintForceBulkConcentrationBC        = prepTerm('test(c_id)','c_id',obj.c_id);
+
+    wConstraintExpressionElectrodePotentialBC       = 'phi-phi_s';
+    wConstraintForceElectrodePotentialBC            = 'test(phi)';
+
 
     wEquations = [wNernstPlanck; wPoisson];
     
@@ -687,7 +695,7 @@ function obj = updatePhysicsForWeakForm(obj)
     % set discretization
     obj.m.physics('WeakFormulation').prop('ShapeProperty').set('order', '4');
     obj.m.physics('WeakFormulation').prop('ShapeProperty').set('valueType', 'real');
-    obj.m.physics('WeakFormulation').prop('ShapeProperty').set('shapeFunctionType', 'shherm');
+    obj.m.physics('WeakFormulation').prop('ShapeProperty').set('shapeFunctionType', 'shlag');
     
     obj.m.physics('WeakFormulation').field('dimensionless').component([obj.c_id {'phi'}]);
     obj.m.physics('WeakFormulation').feature('wfeq1').set('weak', wEquations);
@@ -699,13 +707,19 @@ function obj = updatePhysicsForWeakForm(obj)
         obj.m.physics('WeakFormulation').feature('init1').set(obj.c_id{i},obj.c_0_id{i});
         
         % surface flux
+%         obj.m.physics('WeakFormulation').feature(obj.surfaceFluxBC_id{i}).set('ConstraintType','userDefined');
         obj.m.physics('WeakFormulation').feature(obj.surfaceFluxBC_id{i}).selection.named('geom_bpeSurface');
         obj.m.physics('WeakFormulation').feature(obj.surfaceFluxBC_id{i}).set('weakExpression',wSurfaceFluxBC{i});
+%         obj.m.physics('WeakFormulation').feature(obj.surfaceFluxBC_id{i}).set('constraintExpression',wConstraintExpressionSurfaceFluxBC{i});
+%         obj.m.physics('WeakFormulation').feature(obj.surfaceFluxBC_id{i}).set('constraintForce',wConstraintForceSurfaceFluxBC{i});
         
         % bulk concentration
+        obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).set('constraintType','userDefined');
         obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).selection.named('geom_lateralBoundary');
-        obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).set('weakExpression',wBulkConcentrationBC{i});
-        obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).feature([obj.bulkConcentrationBC_id{i},'_aux']).set('fieldVariableName',obj.lambdaCBulk_id{i});
+%         obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).set('weakExpression',wBulkConcentrationBC{i});
+%         obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).feature([obj.bulkConcentrationBC_id{i},'_aux']).set('fieldVariableName',obj.lambdaCBulk_id{i});
+        obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).set('constraintExpression',wConstraintExpressionBulkConcentrationBC{i});
+        obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).set('constraintForce',wConstraintForceBulkConcentrationBC{i});
     end
        
     % Poisson
@@ -714,14 +728,20 @@ function obj = updatePhysicsForWeakForm(obj)
     obj.m.physics('WeakFormulation').feature('init1').set('phi', 'phi0');
     
     % electrode potential
+    obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').set('constraintType','userDefined');
     obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').selection.named('geom_electrodes');
-    obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').set('weakExpression',wElectrodePotentialBC);
-    obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').feature('ElectrodePotentialBC_aux').set('fieldVariableName','lambdaPhiElectrode');
+%     obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').set('weakExpression',wElectrodePotentialBC);
+%     obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').feature('ElectrodePotentialBC_aux').set('fieldVariableName','lambdaPhiElectrode');
+    obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').set('constraintExpression',wConstraintExpressionElectrodePotentialBC);
+    obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').set('constraintForce',wConstraintForceElectrodePotentialBC);
     
     % surface charge density
+%     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').set('ConstraintType','userDefined');
     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').selection.named('geom_bpeSurface');
     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').set('weakExpression',wSurfaceChargeDensityBC);
-
+%     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').set('constraintExpression',wConstraintExpressionSurfaceChargeDensityBC);
+%     obj.m.physics('WeakFormulation').feature('SurfaceChargeDensityBC').set('constraintForce',wConstraintForceElectrodeSurfaceChargeDensityBC);
+%     
     
     % Identity pair continuity
     ap = obj.getIdentityPairsForComponent('comp1');

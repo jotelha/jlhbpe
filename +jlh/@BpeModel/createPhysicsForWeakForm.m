@@ -8,10 +8,9 @@ function obj = createPhysicsForWeakForm(obj)
         obj.m.physics('WeakFormulation').create(obj.surfaceFluxBC_id{i}, 'WeakContribution', 1);
         obj.m.physics('WeakFormulation').feature(obj.surfaceFluxBC_id{i}).label(obj.surfaceFluxBC_id{i});
 
-        obj.m.physics('WeakFormulation').create(obj.bulkConcentrationBC_id{i}, 'WeakContribution', 1);
+        obj.m.physics('WeakFormulation').create(obj.bulkConcentrationBC_id{i}, 'PointwiseConstraint', 1);
         obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).label(obj.bulkConcentrationBC_id{i});
-
-        obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).create([obj.bulkConcentrationBC_id{i},'_aux'], 'AuxiliaryField', 1);
+%         obj.m.physics('WeakFormulation').feature(obj.bulkConcentrationBC_id{i}).create([obj.bulkConcentrationBC_id{i},'_aux'], 'AuxiliaryField', 1);
     end
     
     % Poisson BC
@@ -19,9 +18,9 @@ function obj = createPhysicsForWeakForm(obj)
 %     obj.m.physics('WeakFormulation').feature('BulkPotentialBC').label('BulkPotentialBC');
 %     obj.m.physics('WeakFormulation').feature('BulkPotentialBC').create('BulkPotentialBC_aux', 'AuxiliaryField', 1);
 
-    obj.m.physics('WeakFormulation').create('ElectrodePotentialBC', 'WeakContribution', 1);
+    obj.m.physics('WeakFormulation').create('ElectrodePotentialBC', 'PointwiseConstraint', 1);
     obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').label('ElectrodePotentialBC');
-    obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').create('ElectrodePotentialBC_aux', 'AuxiliaryField', 1);
+%     obj.m.physics('WeakFormulation').feature('ElectrodePotentialBC').create('ElectrodePotentialBC_aux', 'AuxiliaryField', 1);
     
     
     obj.m.physics('WeakFormulation').create('SurfaceChargeDensityBC', 'WeakContribution', 1);
