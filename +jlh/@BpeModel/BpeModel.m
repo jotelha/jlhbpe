@@ -665,6 +665,9 @@ classdef BpeModel < handle
         
         obj = createPhysicsForWeakForm(obj)
         obj = updatePhysicsForWeakForm(obj)
+        
+        obj = createPhysicsForClassicalForm(obj)
+        obj = updatePhysicsForClassicalForm(obj)
     
         obj = updateViews(obj)
         obj = updateDatasets(obj,dset)
@@ -724,7 +727,7 @@ classdef BpeModel < handle
         obj = updateGlobalPlotsBySolnum(obj,dset,par,plotDset);
         obj = updatePlotsDimensionless(obj,dset)
         obj = plotCurrents(obj)
-        obj = plotAlongCrossection(obj,dset,dsetFolder)
+        obj = plotAlongCrossection(obj,dset,xexp,dsetFolder)
         obj = plotPresetCrossections(obj,dset)
         obj = sweepHorizontalCrossection(obj,dset,stepSize,left,right,lower,upper)
 %         obj = sweepHorizontalCrossectionAtBpe(obj,dset,stepSize)

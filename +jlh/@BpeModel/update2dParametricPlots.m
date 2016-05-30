@@ -66,7 +66,7 @@ function obj = update2dParametricPlots(obj,dset,plotDset)
     nParameters = size(info.solpar,1);
     nRuns = info.sizesolvals / nParameters;
     
-    parameterNames = {info.solpar};
+    parameterNames = info.solpar;
     parameterValues = reshape(info.solvals,nParameters,nRuns)';
 %     m.m.sol('sol1').feature('s1').feature('pDef').getStringArray('plistarr')
     for j = 1:nRuns
