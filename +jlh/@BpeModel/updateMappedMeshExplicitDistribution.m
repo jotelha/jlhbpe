@@ -1,4 +1,4 @@
-function obj = updateMappedMesh(obj)
+function obj = updateMappedMeshExplicitDistribution(obj)
     import com.comsol.model.*
     import com.comsol.model.util.*
     import jlh.hf.*

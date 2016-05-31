@@ -581,22 +581,22 @@ obj.m.selection('leftBoundaryOfSurface').set('ymax', '0');
 
 obj.m.selection('rightBoundaryOfSurface').set('entitydim', '0');
 obj.m.selection('rightBoundaryOfSurface').label('rightBoundaryOfSurface');
-obj.m.selection('rightBoundaryOfSurface').set('xmin', 'w_bpe/2+w_bulkRight');
-obj.m.selection('rightBoundaryOfSurface').set('xmax', 'w_bpe/2+w_bulkRight');
+obj.m.selection('rightBoundaryOfSurface').set('xmin', 'w_bpe/2');
+obj.m.selection('rightBoundaryOfSurface').set('xmax', 'w_bpe/2');
 obj.m.selection('rightBoundaryOfSurface').set('ymin', '0');
 obj.m.selection('rightBoundaryOfSurface').set('ymax', '0');
 
 obj.m.selection('leftBoundaryOfZetaPlane').set('entitydim', '0');
 obj.m.selection('leftBoundaryOfZetaPlane').label('leftBoundaryOfZetaPlane');
-obj.m.selection('leftBoundaryOfZetaPlane').set('xmin', '-w_bpe/2-w_bulkLeft');
-obj.m.selection('leftBoundaryOfZetaPlane').set('xmax', '-w_bpe/2-w_bulkLeft');
+obj.m.selection('leftBoundaryOfZetaPlane').set('xmin', '-w_bpe/2');
+obj.m.selection('leftBoundaryOfZetaPlane').set('xmax', '-w_bpe/2');
 obj.m.selection('leftBoundaryOfZetaPlane').set('ymin', 'epsilon');
 obj.m.selection('leftBoundaryOfZetaPlane').set('ymax', 'epsilon');
 
 obj.m.selection('rightBoundaryOfZetaPlane').set('entitydim', '0');
 obj.m.selection('rightBoundaryOfZetaPlane').label('rightBoundaryOfZetaPlane');
-obj.m.selection('rightBoundaryOfZetaPlane').set('xmin', 'w_bpe/2+w_bulkRight');
-obj.m.selection('rightBoundaryOfZetaPlane').set('xmax', 'w_bpe/2+w_bulkRight');
+obj.m.selection('rightBoundaryOfZetaPlane').set('xmin', 'w_bpe/2');
+obj.m.selection('rightBoundaryOfZetaPlane').set('xmax', 'w_bpe/2');
 obj.m.selection('rightBoundaryOfZetaPlane').set('ymin', 'epsilon');
 obj.m.selection('rightBoundaryOfZetaPlane').set('ymax', 'epsilon');
 
