@@ -10,6 +10,7 @@ if ~exist('caseStudyParameterFile','var')
 end
 
 m = jlh.BpeModel;
+fprintf('Calling %s...\n',caseStudyParameterFile);
 run(caseStudyParameterFile);
 m.prepareIdentifiers;
 
@@ -213,7 +214,7 @@ m.m.func('interpSolution1d').set('filename', txtFileName);
 m.m.func('interpSolution1d').set('nargs', '1');
 m.m.func('interpSolution1d').active(true);
 
-
+return;
 
 %% plot 1d results
 % m.updateEvaluations1d(dset);
@@ -242,7 +243,7 @@ m.saveState;
 % plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
 pname = {'deltaPhi','surfaceFluxRampFactor'};
 % pval = cellstr( cellfun(@(c) num2str(c), sweepPhiInitValues,'UniformOutput',false));
-plistarr = ['1', '1'];
+plistarr = ['1'; '1'];
 
 punit = '';
 useparam = 'on';
@@ -327,6 +328,8 @@ m.m.study(study_id).feature(studyStep_id).activate('zeroNetCurrent0d', false);
 m.m.study(study_id).feature(studyStep_id).activate('zeroNetCurrent1d', false);
 
 m.saveState;
+
+return
 
 %% plot single-step 2d
 storedSolutions = m.m.study(study_id).getSolverSequences('Stored');

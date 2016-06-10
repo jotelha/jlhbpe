@@ -125,6 +125,10 @@ m.Wanode = 0;
 m.WbulkLeft = Wgap;
 m.WbulkRight = Wgap;
 
+% potentials
+E_m = [-0.58,-0.62,-0.65,-1.76];
+
+m.PHI_bpe     = E_m(c); % [phi] = V
 m.PHI_bulk    = 0;
 
 m.deltaPHI = 7.5/100;
@@ -145,9 +149,6 @@ rc = [10.7,10.3,9.3,6.9]/100;
 
 E0a = -1.82; % V, duval2001bipolar
 E0c = -0.55;
-
-E_m = [-0.58,-0.62,-0.65,-1.76];
-m.PHI_bpe     = E_m(c); % [phi] = V
 
 m.customParameters.j0a = j0a(c);
 m.customParameters.j0c = j0c(c);

@@ -4,7 +4,7 @@ function obj = mesh1D(obj)
     z1 = max(obj.z);
     % RT = obj.RT;
     % UT = obj.UT; % thermal voltage
-    
+    accuracy = 1028;
 %     ionicStrength = 1/2* sum(obj.z.^2.*obj.c_bulk); 
 %     lambdaD = sqrt(constants.VacuumPermittivity*epsilon_r*RT/(2*F^2*ionicStrength));
 
@@ -27,7 +27,7 @@ function obj = mesh1D(obj)
 %     phi0 = obj.delta_phi;
     phi0 = obj.phi_bpe;
 %     gamma = tanh( abs(z1) * phi0/4);
-    oldDigits = digits(128);
+    oldDigits = digits(accuracy);
     gamma = tanh(vpa(phi0/4));
     offset = obj.delta;
 %     offset = 0;
@@ -89,7 +89,7 @@ function obj = mesh1D(obj)
     constantLength = false;
     failN = 1;
     % adjusting mesh intervals such that Peclet number does not exceed 1 anywhere
-    opt = optimset('TolX',1e-128);
+    opt = optimset('TolX',10^(-accuracy));
     while(xCur<1)
         PeStabilityCriterion = @(h) double( PeEstimate(xCur,h) ) - 1;
 %         PeStabilityCriterionSquare = @(h) PeStabilityCriterion(h)^2;

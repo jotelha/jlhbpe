@@ -34,11 +34,11 @@ function obj = updateOperatorsForChoppedGeometry(obj)
     obj.projectReactionPlaneToSurface.label('projectReactionPlaneToSurface');
     obj.projectReactionPlaneToSurface.set('opname', 'projectReactionPlaneToSurface');
 %     obj.projectReactionPlaneToSurface.selection('dstvertex1').geom('geom', 0);
-    obj.projectReactionPlaneToSurface.selection('dstvertex1').set(leftBoundaryOfSurfaceVertexIndex);
-    obj.projectReactionPlaneToSurface.selection('dstvertex2').set(rightBoundaryOfSurfaceVertexIndex);
+    obj.projectReactionPlaneToSurface.selection('dstvertex1').set(leftBoundaryOfSurfaceVertexIndex(1));
+    obj.projectReactionPlaneToSurface.selection('dstvertex2').set(rightBoundaryOfSurfaceVertexIndex(1));
 %     obj.projectReactionPlaneToSurface.selection('srcvertex1').geom('geom', 0);
-    obj.projectReactionPlaneToSurface.selection('srcvertex1').set(leftBoundaryOfZetaPlaneVertexIndex);
-    obj.projectReactionPlaneToSurface.selection('srcvertex2').set(rightBoundaryOfZetaPlaneVertexIndex);
+    obj.projectReactionPlaneToSurface.selection('srcvertex1').set(leftBoundaryOfZetaPlaneVertexIndex(1));
+    obj.projectReactionPlaneToSurface.selection('srcvertex2').set(rightBoundaryOfZetaPlaneVertexIndex(1));
 
     
     % project currents at surface to bulk exit

@@ -10,7 +10,7 @@ cKNO3  = [100,10,1,0.1]; % mmol /l = mol/m^3
 % atomicWeightAl = 26.9815 * 1.660539040e-27; %u -> kg
 % densityAl = 2.7 * 100^3/1000; %g/cm^3 -> kg/m^3 at r.t.
 % numberConcentrationAl = densityAl / atomicWeightAl;
-% molarConcentrationAl = numberConcentrationAl / constants.AvogadroConstant;
+% molarConcentrationAl = numberConcentrationAl /  jlh.Constants.AvogadroConstant;
 % cAl = molarConcentrationAl;
 
 % pH = 5.5;
@@ -56,7 +56,7 @@ m.plotsVisible = 'on'; % 'off' stores plots, but does not show them as pop ups
 
 
 % environment and physical constants
-m.epsilon_r = Constants.RelativePermittivityOfWater; % relative permittivity of electrolyte, here water
+m.epsilon_r =  jlh.Constants.RelativePermittivityOfWater; % relative permittivity of electrolyte, here water
 
 m.T = 298.15; % K, equivalent to 25 deg C
 
@@ -83,7 +83,10 @@ m.Wanode = 0;
 m.WbulkLeft = Wgap;
 m.WbulkRight = Wgap;
 
-m.PHI_bpe     = 0; % [phi] = V
+% potentials
+E_m = [0.095,0.021,-0.133,-0.286];
+
+m.PHI_bpe     = E_m(c); % [phi] = V
 m.PHI_bulk    = 0;
 
 m.deltaPHI = 7.5/100;
@@ -99,10 +102,6 @@ j0c    = [0.72,1.36,0.24,0.07] / 100;
 ra = [33.4,18.4,15.4,10.8]/100;
 rc = [28.2,17.7,17.5,14.4]/100;
 
-
-E_m = [0.095,0.021,-0.133,-0.286];
-
-
 m.customParameters.cO2 = 258e-3; % 258 muMol = 258e-6 mol/l = 258e-3 mol/m^3? http://www.engineeringtoolbox.com/oxygen-solubility-water-d_841.html
 m.customParameters.cH2O = 55560; % mol/m^3
 
@@ -111,8 +110,10 @@ m.customParameters.j0c = j0c(c);
 m.customParameters.ra = ra(c);
 m.customParameters.rc = rc(c);
 
-m.customParameters.E0a = 0.68; % V, duval2003faradaic
-m.customParameters.E0c = -0.55;
+E0a = 0.68; % V, duval2003faradaic
+E0c = -0.55;
+m.customParameters.E0a = E0a;
+m.customParameters.E0c = E0c;
 
 %% Acidic Oxygen Reduction, balance to anodic oxygen evolution
 i = 0;
@@ -125,6 +126,7 @@ m.reactions{i}.reaction                   = 'O2 + 4H3O+ + 4e- <= 6H2O'; % simpli
 m.reactions{i}.anodicCurrentTerm        = 'j0a*exp(ra*F_const/RT*(V-E0a))';
 m.reactions{i}.cathodicCurrentTerm      = [];
 
+m.reactions{i}.E0                         = E0a;
 m.reactions{i}.n                          = 4; % as in Krawiec, but why?
 m.reactions{i}.flux                       = [-4,0,0,0]; % outward flux of H3Op with cathodic current 
 
@@ -138,6 +140,7 @@ m.reactions{i}.anodicCurrentTerm        = [];
 m.reactions{i}.cathodicCurrentTerm      = '-j0c*exp(-rc*F_const/RT*(V-E0c))';
 m.reactions{i}.nuReductants{2} = 2;
 
+m.reactions{i}.E0                         = E0c;
 m.reactions{i}.n                          = 2; % as in Krawiec
 m.reactions{i}.flux                       = [0,2,0,0]; % inward flux of OHm with cathodic current 
 
