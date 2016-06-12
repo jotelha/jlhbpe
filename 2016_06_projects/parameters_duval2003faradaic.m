@@ -1,4 +1,4 @@
-caseStudyTitle = 'duval2003faradaic';
+% caseStudyTitle = 'duval2003faradaic';
 c = 4;
 
 % concentrations

@@ -69,26 +69,27 @@ function obj = updateParameters(obj)
         obj.m.param.set(obj.c_bulk_id{n}, attachUnit(obj.c_bulk(n),'mol/m^3'), 'Bulk concentration');
     end
 
+% simulation ramping factors
     % all below should be changed to directly insert numeric values from matlab
     obj.m.param.set('surfacePotentialRampFactor', 1);
     obj.m.param.set('surfaceFluxRampFactor', 1);
     obj.m.param.set('chargeDensityRampFactor', 1);
     obj.m.param.set('deltaPhiRampFactor', 1);
     
+% dimensionless measures
+
     obj.m.param.set('epsilon', num2str(obj.epsilon), 'Dimensionless Debye length scale');
     obj.m.param.set('delta', num2str(obj.delta), 'Dimensionless Stern layer width');
 %     obj.m.param.set('gamma', num2str(obj.gamma), 'Dimensionless relation betweeb Debye length and domain width');
 %     obj.m.param.set('beta', num2str(obj.beta), 'Dimensionless relation betweeb Debye length and BPE width');
-
-%     obj.m.param.set('W', widthW, 'Cell width');
-%     obj.m.param.set('Wbpe', widthWbpe, 'Width of BPE');
     
+    obj.m.param.set('h', '1', 'Cell height');
+
     obj.m.param.set('w', obj.w, 'Cell width');
     obj.m.param.set('w_bpe', obj.w_bpe, 'Width of BPE');
     obj.m.param.set('w_bulkLeft', obj.w_bulkLeft, 'Width of insulating stretch left of system');
     obj.m.param.set('w_bulkRight', obj.w_bulkRight, 'Width of insulating stretch right of system');
-
-    
+  
     obj.m.param.set('w_insulatorLeft', obj.w_insulatorLeft, 'Width of left insulator');
     obj.m.param.set('w_insulatorRight', obj.w_insulatorRight, 'Width of right insulator');
     obj.m.param.set('w_cathode', obj.w_cathode, 'Width of cathode / WE');
@@ -98,30 +99,17 @@ function obj = updateParameters(obj)
     obj.m.param.set('nMeshChops', obj.nMeshChops, 'No of mesh chops on BPE');
     obj.m.param.set('nSegmentsPerChop', obj.nSegmentsPerChop, 'No of surface segments per chop');
     obj.m.param.set('extendedDdlFactor', obj.extendedDdlFactor, 'How many debye lengths should mesh refinemend stretch beyond DDL');
-   
-    obj.m.param.set('L', lengthL, 'Cell depth');
     
-    obj.m.param.set('lambdaD', debyeLengthTerm, 'Debye length');
-    obj.m.param.set('kappa', 'lambdaD^(-1)', 'reciprocal of Debye length');
-    obj.m.param.set('lambdaS', lambdaS); % width of Stern layer, move to parameter settings
-
-    obj.m.param.set('T', attachUnit(obj.T,'K'), 'Temperature'); % move to parameter settings
-    obj.m.param.set('RT', RT_term, 'Molar gas constant * Temperature');
-    obj.m.param.set('UT', UT_term, 'thermal voltage, R*T/F');
+ 
     obj.m.param.set('epsilon_r', num2str(obj.epsilon_r), 'relative permittivity of electrolyte');
 
     obj.m.param.set('z_ref', max(abs(obj.z)), 'reference charge number for initial value estimate');
-    obj.m.param.set('IonicStrength', ionicStrengthTerm, '');
-    obj.m.param.set('c_ref',c_ref, 'reference concentration for dimensionless formulation');
-    obj.m.param.set('D_ref',attachUnit(obj.D_ref,'m^2/s'), 'reference diffusivity for dimensionless formulation');
-    obj.m.param.set('kappa_bulk',kappaTerm, 'ionic conductivity in bulk solution');
+    
+    obj.m.param.set('kappa_bulk',kappaTerm, 'ionic conductivity in bulk solution'); % dimensional or dimensionless?
 
-    % m.param.set('C_Stern', 'epsilon0_const*epsilon_r/lambdaS', 'Stern layer capacitance'); % Stern layer capacitance
     obj.m.param.set('C_Stern', C_Stern, 'Stern layer capacitance, dimensionless'); % Stern layer capacitance
-    obj.m.param.set('C_Stern_dimensional', C_Stern_dimensional, 'Stern layer capacitance'); % Stern layer capacitance
 
     % m.param.set('phi_bpe',attachUnit(phi_bpe,'V'),'potential at surface of bpe');
-    obj.m.param.set('PHI_bpe',['surfacePotentialRampFactor*',attachUnit(obj.PHI_bpe,'V')],'potential at surface of bpe');
     obj.m.param.set('phi_bpe_init',obj.phi_bpe,'dimensionless potential at surface of bpe');
     obj.m.param.set('deltaPhi',deltaPhiTerm,'potential difference between working electrode and counter electrode');
     obj.m.param.set('phiSymmetryFactor',obj.phiSymmetryFactor,'symmetry of applied potential around bpe potential');
@@ -132,13 +120,30 @@ function obj = updateParameters(obj)
     obj.m.param.set('phi_bulk','0','bulk electrolyte as reference');
     obj.m.param.set('phi_ref','0','reference potential');
 
-    % concentration of water, iron and iron ions
-%     obj.m.param.set('cH2O', attachUnit(obj.cH2O,'mol/m^3'), '1000 g / l * 1 mol / 18 g = 55.56 mol / L');
-%     obj.m.param.set('cH2', attachUnit(obj.cH2,'mol/m^3'));
-%     obj.m.param.set('cO2', attachUnit(obj.cO2,'mol/m^3'));
-%     obj.m.param.set('cFe', attachUnit(obj.cFe,'mol/m^3'));
-%     obj.m.param.set('cFe2p', attachUnit(obj.cFe2p,'mol/m^3'));
+    % dimensional quantities
+    obj.m.param.set('IonicStrength', ionicStrengthTerm, 'Ionic Strength');
+    obj.m.param.set('c_ref',c_ref, 'reference concentration for dimensionless formulation');
+    obj.m.param.set('D_ref',attachUnit(obj.D_ref,'m^2/s'), 'reference diffusivity for dimensionless formulation');
+    
+    obj.m.param.set('lambdaD', debyeLengthTerm, 'Debye length');
+    obj.m.param.set('kappa', 'lambdaD^(-1)', 'reciprocal of Debye length');
+    obj.m.param.set('lambdaS', lambdaS); % width of Stern layer, move to parameter settings
+    
+    obj.m.param.set('L', lengthL, 'Characteristic length, usually multiple of Debye length');
+    obj.m.param.set('H', 'h*L', 'Cell depth');
 
+    obj.m.param.set('W', 'w*L', 'Cell width');
+    obj.m.param.set('Wbpe', 'w_bpe*L', 'Width of BPE');
+    obj.m.param.set('XleftBoundary', '(-w_bpe/2-w_bulkLeft)*L');
+    obj.m.param.set('XrightBoundary', '(w_bpe/2+w_bulkRight)*L');
+    
+    obj.m.param.set('PHI_bpe',['surfacePotentialRampFactor*',attachUnit(obj.PHI_bpe,'V')],'potential at surface of bpe');
+    obj.m.param.set('C_Stern_dimensional', C_Stern_dimensional, 'Stern layer capacitance'); % Stern layer capacitance  
+
+    obj.m.param.set('T', attachUnit(obj.T,'K'), 'Temperature'); % move to parameter settings
+    obj.m.param.set('RT', RT_term, 'Molar gas constant * Temperature');
+    obj.m.param.set('UT', UT_term, 'thermal voltage, R*T/F');
+    
     % setup electrochemical surface reaction parameters
     for i=1:obj.nReactions 
 %         obj.m.param.set(obj.k0_id{i},attachUnit(obj.reactions{i}.k0,'m/s'),['standard rate constant of ',obj.reactions{i}.reaction]);
@@ -178,6 +183,4 @@ function obj = updateParameters(obj)
     
     % smoothen Bpe BC factor
     obj.m.param.set('smootheningFactor', 1);
-
-            
 end

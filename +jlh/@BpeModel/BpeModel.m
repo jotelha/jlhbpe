@@ -636,6 +636,9 @@ classdef BpeModel < handle
         obj = makeChoppedGeometry(obj)
         obj = makeSimpleGeometry(obj)
         
+        obj = makeSimpleRectangularBulkGeometry(obj,geom_id)
+        obj = makeSimpleRectangularDdlGeometry(obj,geom_id)
+        
         obj = updateModel(obj)
         
         obj = updateParameters(obj)

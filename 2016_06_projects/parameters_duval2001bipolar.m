@@ -1,4 +1,4 @@
-caseStudyTitle = 'duval2001bipolar';
+% caseStudyTitle = 'duval2001bipolar';
 c = 4;
 % aluminium electrode
 % 10^-2 M KNO3 solution
