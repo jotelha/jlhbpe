@@ -10,7 +10,7 @@ caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 caseStudyTitle = 'geometryPartFile';
 createEmptyProject;
 
-% simple rectangular bulk geometry part
+%% simple rectangular bulk geometry part
 geom_id = 'simpleBulkGeometryPart';
 % m.updateParameters();
 %m.m.geom.create('geom',2);
@@ -197,12 +197,14 @@ model.geom.create('simpleAssembledGeometry',2);
 model.geom('simpleAssembledGeometry').label('simpleAssembledGeometry');
 model.geom('simpleAssembledGeometry').repairTol(1.0E-10);
 model.geom('simpleAssembledGeometry').create('simpleBulkGeometryPartInstance','PartInstance');
+model.geom('simpleAssembledGeometry').feature('simpleBulkGeometryPartInstance').label('simpleBulkGeometryPartInstance');
 model.geom('simpleAssembledGeometry').feature('simpleBulkGeometryPartInstance').set('part','simpleBulkGeometryPart');
 model.geom('simpleAssembledGeometry').feature('simpleBulkGeometryPartInstance').setEntry('inputexpr', 'lambdaD', 'lambdaD');
 model.geom('simpleAssembledGeometry').feature('simpleBulkGeometryPartInstance').setEntry('inputexpr', 'W', 'W');
 model.geom('simpleAssembledGeometry').feature('simpleBulkGeometryPartInstance').setEntry('inputexpr', 'H', 'H');
 model.geom('simpleAssembledGeometry').feature('simpleBulkGeometryPartInstance').setEntry('inputexpr', 'XleftBoundary', 'XleftBoundary');
 model.geom('simpleAssembledGeometry').create('simpleDdlGeometryPartInstance','PartInstance');
+model.geom('simpleAssembledGeometry').feature('simpleDdlGeometryPartInstance').label('simpleDdlGeometryPartInstance');
 model.geom('simpleAssembledGeometry').feature('simpleDdlGeometryPartInstance').set('part','simpleDdlGeometryPart');
 model.geom('simpleAssembledGeometry').feature('simpleDdlGeometryPartInstance').setEntry('inputexpr', 'lambdaD', 'lambdaD');
 model.geom('simpleAssembledGeometry').feature('simpleDdlGeometryPartInstance').setEntry('inputexpr', 'W', 'W');
@@ -214,7 +216,7 @@ model.geom('simpleAssembledGeometry').feature('entireSurface').set('input', {'si
 model.geom('simpleAssembledGeometry').create('upperBoundary', 'UnionSelection');
 model.geom('simpleAssembledGeometry').feature('upperBoundary').set('entitydim', '1');
 model.geom('simpleAssembledGeometry').feature('upperBoundary').label('upperBoundarySelection');
-model.geom('simpleAssembledGeometry').feature('entireSurface').set('input', {'simpleBulkGeometryPartInstance_entireSurface'});
+model.geom('simpleAssembledGeometry').feature('upperBoundary').set('input', {'simpleBulkGeometryPartInstance_upperBoundary'});
 model.geom('simpleAssembledGeometry').create('leftBoundarySelection', 'UnionSelection');
 model.geom('simpleAssembledGeometry').feature('leftBoundarySelection').set('entitydim', '1');
 model.geom('simpleAssembledGeometry').feature('leftBoundarySelection').label('leftBoundarySelection');
@@ -602,6 +604,12 @@ model.mesh('simpleBulkGeometryRefinedMesh').feature('ftri1').feature('size1').se
 % model.mesh('simpleBulkGeometryRefinedMesh').feature('ftri1').feature('size1').set('hminactive', false);
 model.mesh('simpleBulkGeometryRefinedMesh').run;
 
+model.mesh('simpleBulkGeometryRefinedMesh').export.set('type', 'nativeascii');
+simpleBulkGeometryRefinedMeshFile = [pwd,'\',m.projectPath,'\simpleBulkGeometryRefinedMesh.mphtxt'];
+% model.mesh('simpleBulkGeometryRefinedMesh').export.set('filename', 'D:\windows\Users\jotelha\Google Docs\johnny\matlab\jlhbpe\2016_06_projects\dat\2016_06_13_18_52_56_geometryPartFile\simpeDdlGeometryRefinedMesh.mphtxt');
+model.mesh('simpleBulkGeometryRefinedMesh').export(simpleBulkGeometryRefinedMeshFile);
+
+
 % ddl geometry
 
 model.mesh.create('simpleDdlGeometryRefinedMesh', 'simpleDdlGeometryWithMeshingEntities');
@@ -661,13 +669,17 @@ model.mesh('simpleDdlGeometryRefinedMesh').feature('edg4').feature('size1').set(
 model.mesh('simpleDdlGeometryRefinedMesh').feature('edg4').feature('size1').set('hgradactive', true);
 model.mesh('simpleDdlGeometryRefinedMesh').run;
 
+model.mesh('simpleDdlGeometryRefinedMesh').export.set('type', 'nativeascii');
+simpleDdlGeometryRefinedMeshFile = [pwd,'\',m.projectPath,'\simpleDdlGeometryRefinedMesh.mphtxt'];
+model.mesh('simpleDdlGeometryRefinedMesh').export(simpleDdlGeometryRefinedMeshFile);
+
 m.saveState;
 
 %% save information on created files
 geometryPartsProjectName = m.projectName;
 geometryPartsMphFile = char(m.m.getFilePath);
 
-toSave = {'geometryPartsProjectName','geometryPartsMphFile'};
+toSave = {'geometryPartsProjectName','geometryPartsMphFile','simpleBulkGeometryRefinedMeshFile','simpleDdlGeometryRefinedMeshFile'};
 N = numel(toSave);
 dat = cell(N,1);
 for i=1:N

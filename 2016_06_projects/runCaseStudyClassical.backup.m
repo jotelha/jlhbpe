@@ -3,101 +3,70 @@ import com.comsol.model.util.*
 import jlh.*
 import jlh.hf.*
 
-% parameter file for geometry to be created
-caseStudyParameterFile = 'parameters_duval2001bipolar.m';
+%% create new project
+
+if ~exist('caseStudyParameterFile','var')
+    caseStudyParameterFile = 'parameters_duval2001bipolar.m';
+end
+
+m = jlh.BpeModel;
+fprintf('Calling %s...\n',caseStudyParameterFile);
+run(caseStudyParameterFile);
+m.prepareIdentifiers;
+
+if ~exist('caseStudyTitle','var')
+    caseStudyTitle = 'duval2001bipolar';
+end
+if ~exist('caseStudyTitleSuffix','var')
+    caseStudyTitleSuffix = '';
+end
+
+m.newProject([caseStudyTitle,caseStudyTitleSuffix]);
+
+%% run logger
+% also necessary to execute when loading
+
+% kill logger, if already running
+if exist('loggerPid','var') && loggerPid > 0
+    ModelUtil.showProgress(false);
+    fprintf('Trying to kill logger with PID %d...\n', loggerPid);
+    system(sprintf('taskkill /pid %d /f',loggerPid),'-echo');
+end
+
+spawn = strrep('G:\scripts\launchers\spawn.bat','\','\\');
+mTail = strrep('G:\scripts\mtail\mTail.exe','\','\\');
+
+% server log file
+logFile = [pwd(),'\',m.projectPath,'\comsol.log'];
+% fclose(fopen(logFile, 'w'));
+ModelUtil.showProgress(logFile);
+logFileArg = strrep(logFile,'\','\\');
+
+% system(sprintf('G:\\scripts\\mtail\\mTail.exe "%s" /start &',logFile));
+cmd = prepTerm('spawn mTail "logFile" /start','spawn','mTail','logFile',spawn,mTail,logFileArg);
+% spawn helper script yields logger pid
+[status,cmdout] = system(cmd{1},'-echo');
+loggerPid = str2double(cmdout);
 
 
-caseStudyTitle = 'duval2001bipolar';
-createEmptyProject;
-
-% prepare text files
-files = containers.Map;
-makeParameterFile
-makeVariablesFiles
-
-%% load parameters, geometry and mesh
-T = readtable('geometryPartsFile.txt','ReadRowNames',true,'ReadVariableNames',false,'Delimiter',' ');
-% writetable(T,'geometryPartsFile.txt','WriteRowNames',true,'WriteVariableNames',false,'Delimiter',' ');
-geometryPartsMphFile = T.(1)('geometryPartsMphFile');
-simpleBulkGeometryRefinedMeshFile = T.(1)('simpleBulkGeometryRefinedMeshFile');
-simpleDdlGeometryRefinedMeshFile = T.(1)('simpleDdlGeometryRefinedMeshFile');
-
-model = m.m;
-
-model.param().loadFile(files('parameterFile'));
-
-% mesh parts
-
-model.modelNode.create('mcomp1', 'MeshComponent');
-model.geom.create('mgeom1', 2); % mesh geometry
-model.mesh.create('simpleBulkGeometryRefinedMeshPart', 'mgeom1');
-model.mesh('simpleBulkGeometryRefinedMeshPart').create('imp1', 'Import');
-model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
-model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('filename', simpleBulkGeometryRefinedMeshFile);
-model.mesh('simpleBulkGeometryRefinedMeshPart').run;
-% model.mesh('mpart1').feature('imp1').set('facepartition', 'auto');
-
-model.modelNode.create('mcomp2', 'MeshComponent');
-model.geom.create('mgeom2', 2); % mesh geometry
-model.mesh.create('simpleDdlGeometryRefinedMeshPart', 'mgeom2');
-model.mesh('simpleDdlGeometryRefinedMeshPart').create('imp1', 'Import');
-model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
-model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('filename', simpleDdlGeometryRefinedMeshFile);
-model.mesh('simpleDdlGeometryRefinedMeshPart').run;
-
-%% geometry sequences
-
-% % component for rough tertiary current approximation
-% % m.comp_id = 'tertiaryCurrentDistributionComponent';
-% model.modelNode.create('tertiaryCurrentDistributionComponent'); 
-% model.geom.create('tertiaryCurrentDistributionGeometry',2);
-% % model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleAssembledGeometry');
-% model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleBulkGeometry');
-% 
-% model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
-% model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
-% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
-% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').geom(2);
-% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').geom(2);
-% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').all;
-% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_space_dom');
-% model.mesh('tertiaryCurrentDistributionMesh').run('copy1');
-
-% component for exact PNP solution
-model.modelNode.create('dilutedSpeciesAndElectrostaticsComponent'); 
-model.geom.create('dilutedSpeciesAndElectrostaticsGeometry',2);
-% model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleAssembledGeometry');
-model.geom('dilutedSpeciesAndElectrostaticsGeometry').insertFile(geometryPartsMphFile, 'simpleAssembledGeometry');
-
-model.mesh.create('dilutedSpeciesAndElectrostaticsMesh', 'dilutedSpeciesAndElectrostaticsGeometry');
-
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').create('copy1', 'Copy');
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy1').selection('source').geom(2);
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy1').selection('destination').geom(2);
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy1').selection('source').all;
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy1').selection('destination').named('dilutedSpeciesAndElectrostaticsGeometry_simpleBulkGeometryPartInstance1_space_dom');
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').run('copy1');
-
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').create('copy2', 'Copy');
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy2').set('mesh', 'simpleDdlGeometryRefinedMeshPart');
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy2').selection('source').geom(2);
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy2').selection('destination').geom(2);
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy2').selection('source').all;
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').feature('copy2').selection('destination').named('dilutedSpeciesAndElectrostaticsGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
-model.mesh('dilutedSpeciesAndElectrostaticsMesh').run('copy2');
-
-return;
-
-% model.mesh(
-% model.geom('tertiaryCurrentDistributionGeometry').create('tertiaryCurrentDistributionGeometryImport','Import');
-% model.geom('tertiaryCurrentDistributionGeometry').feature('tertiaryCurrentDistributionGeometryImport').
-%% create other features
+%% remove other models from server, create COMSOL model and make geometry
+loadedModels    = ModelUtil.tags;
+isLoaded        = arrayfun( @(s) strcmp(m.model_tag,s),loadedModels);
+if any(isLoaded)
+    ModelUtil.remove(m.model_tag);
+end
+m.m = ModelUtil.create(m.model_tag);   % creates model on COMSOL server
+m.m.disableUpdates(true); % try whether speed can be increased
 
 m.createFunctions()
+m.m.modelNode.create(m.comp_id); 
 m.updateParameters();
+m.makeChoppedGeometry();
+% m.makeSimpleGeometry();
 
-
+%% create other features
+% m.createGeometry();
+% m.createSelections();
 m.createOperators()
 m.createVariables();
 % m.createPhysicsForWeakForm();
