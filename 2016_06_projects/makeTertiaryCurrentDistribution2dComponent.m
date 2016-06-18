@@ -93,6 +93,7 @@ model.physics('TertiaryCurrentDistribution').feature('ElectrodePotential').selec
 model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bulkBoundary');
 
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').set('phisext0', 'PHI_bpe'); % bpe
+model.physics('TertiaryCurrentDistribution').feature('BpeSurface').feature('er1').active(false); % deactivate standard reaction
 model.physics('TertiaryCurrentDistribution').feature('ElectrodePotential').set('philbnd', 'phi_s'); % feeder electrodes
 
 

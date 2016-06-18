@@ -12,9 +12,9 @@ function plotAlongCrossection(obj,dset,xexp,plots,dsetFolder)
     % extract plot info
     titles = plots.keys';
     
-    values = plots.values';
+    values = parameters.values';
     hasLabel = cellfun(@(c) iscell(c),values);
-    ylabel = cell(numel(titles),1);
+    ylabel = cell(numel(parameter),1);
     ylabel(hasLabel) = cellfun(@(c) c{2}, values(hasLabel),'UniformOutput',false);
     values(hasLabel) = cellfun(@(c) c{1}, values(hasLabel),'UniformOutput',false);
     expressions = values;
@@ -95,20 +95,22 @@ function plotAlongCrossection(obj,dset,xexp,plots,dsetFolder)
             fileName = sprintf(fileNameTemplate,titles{k},dset);
             obj.m.result.export('plotExporter1d').set('pngfilename', fileName);
             fprintf('  Saving plot as "%s"...\n', fileName);
-            obj.m.result.export('plotExporter1d').run();  
+            obj.m.result.export('plotExporter1d').run();
+            
+            % export data
+            fileName(end-2:end) = 'txt';
+            e = ['x','y',cellfun(@(c) c{:},expressions,'UniformOutput',false)];
+            v = cell(numel(e),1);
+            [v{:}] = mphinterp(obj.m,e,'dataset',dset);
+            out = cell2mat(v)';
+%             save(fileName,'v','-ascii','-double','-tabs');
+%             dlmwrite(fileName,e,'delimiter',';');
+            fid=fopen(fileName,'w');           
+            fprintf(fid,'%s;',e{1:(end-1)});
+            fprintf(fid,'%s\n',e{end});
+            fclose(fid);
+            dlmwrite(fileName,out,'-append','delimiter',';','precision',8);
         end
-        
-        % export data
-        fileName = [dsetSubFolder,'\',dsetFolder,'.txt'];
-        e = ['x','y',cellfun(@(c) c{:},expressions,'UniformOutput',false)'];
-        v = cell(numel(e),1);
-        [v{:}] = mphinterp(obj.m,e,'dataset',dset);
-        out = cell2mat(v)';
-        fid=fopen(fileName,'w');           
-        fprintf(fid,'%s;',e{1:(end-1)});
-        fprintf(fid,'%s\n',e{end});
-        fclose(fid);
-        dlmwrite(fileName,out,'-append','delimiter',';','precision',8);
 end
               
                     

@@ -78,7 +78,7 @@ parameters('smootheningFactor') = 1;
 
 parameters('epsilon') = {num2str(m.epsilon), 'Dimensionless Debye length scale'};
 parameters('delta') = {num2str(m.delta), 'Dimensionless Stern layer width'};
-parameters('h') = {'1', 'Cell height'}; % needs to be CHANGED
+% parameters('h') = {'1', 'Cell height'}; % needs to be CHANGED
 
 parameters('w') = {m.w, 'Cell width'};
 parameters('w_bpe') = {m.w_bpe, 'Width of BPE'};
@@ -124,7 +124,7 @@ parameters('kappa') = {'lambdaD^(-1)', 'reciprocal of Debye length'};
 parameters('lambdaS') = lambdaS; % width of Stern layer, move to parameter settings
 
 parameters('L') = {lengthL, 'Characteristic length, usually multiple of Debye length'};
-parameters('H') = {'h*L', 'Cell depth'};
+parameters('H') = {'L', 'Cell depth'}; % later add as simulation parameter
 
 parameters('W') = {'w*L', 'Cell width'};
 parameters('Wbpe') = {'w_bpe*L', 'Width of BPE'};
@@ -189,3 +189,5 @@ T = table(parameter,value,comment);
 parameterFile = [pwd,'\',m.projectPath,'\parameters.txt'];
 files('parameterFile') = parameterFile;
 writetable(T,parameterFile,'WriteRowNames',false,'WriteVariableNames',false,'Delimiter',' ');
+%% save file records
+jlh.hf.saveMapAsTxt(files,'globalFiles.txt');

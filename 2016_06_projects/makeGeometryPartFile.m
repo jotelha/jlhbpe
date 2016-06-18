@@ -4,18 +4,65 @@ import jlh.*
 import jlh.hf.*
 
 % parameter file for geometry to be created
-caseStudyParameterFile = 'parameters_duval2001bipolar.m';
+if ~exist('caseStudyParameterFile','var')
+    caseStudyParameterFile = 'parameters_duval2001bipolar.m';
+end
 
 
 caseStudyTitle = 'geometryPartFile';
 createEmptyProject;
+
+makeParameterFile
+makeVariablesFiles
+
+model = m.m;
+
+%% 1d geometry part
+
+geom_id = 'simple1dGeometryPart';
+
+model.geom.create(geom_id,'Part',1);
+model.geom(geom_id).label(geom_id);
+
+model.geom(geom_id).inputParam().set('lambdaD','0.1','Debye length');
+model.geom(geom_id).inputParam().set('L','1','width of electrochemical cell');
+
+model.geom(geom_id).repairTol(1.0E-16);
+model.geom(geom_id).create('ddl', 'Interval');
+model.geom(geom_id).feature('ddl').set('p','0,lambdaD');
+model.geom(geom_id).feature('ddl').set('selresult', 'on');
+model.geom(geom_id).feature('ddl').set('selresultshow', 'all');
+
+model.geom(geom_id).create('space', 'Interval');
+model.geom(geom_id).feature('space').label('space');
+model.geom(geom_id).feature('space').set('p','lambdaD,L');
+model.geom(geom_id).feature('space').set('selresult', 'on');
+model.geom(geom_id).feature('space').set('selresultshow', 'all');
+
+model.geom(geom_id).create('surfaceVertex', 'BoxSelection');
+model.geom(geom_id).feature('surfaceVertex').set('entitydim', '0');
+model.geom(geom_id).feature('surfaceVertex').label('surfaceVertex');
+model.geom(geom_id).feature('surfaceVertex').set('condition', 'inside');
+model.geom(geom_id).feature('surfaceVertex').set('xmax', 'lambdaD/2');
+
+model.geom(geom_id).create('bulkVertex', 'BoxSelection');
+model.geom(geom_id).feature('bulkVertex').set('entitydim', '0');
+model.geom(geom_id).feature('bulkVertex').label('bulkVertex');
+model.geom(geom_id).feature('bulkVertex').set('condition', 'inside');
+model.geom(geom_id).feature('bulkVertex').set('xmin', 'L-lambdaD/2');
+
+model.geom(geom_id).create('zetaVertex', 'BoxSelection');
+model.geom(geom_id).feature('zetaVertex').set('entitydim', '0');
+model.geom(geom_id).feature('zetaVertex').label('zetaVertex');
+model.geom(geom_id).feature('zetaVertex').set('condition', 'inside');
+model.geom(geom_id).feature('zetaVertex').set('xmin', 'lambdaD/2');
+model.geom(geom_id).feature('zetaVertex').set('xmax', 'L-lambdaD/2');
 
 %% simple rectangular bulk geometry part
 geom_id = 'simpleBulkGeometryPart';
 % m.updateParameters();
 %m.m.geom.create('geom',2);
 
-model = m.m;
 model.geom.create(geom_id,'Part',2);
 model.geom(geom_id).label(geom_id);
 
@@ -34,7 +81,7 @@ model.geom(geom_id).feature('space').set('size', {'W' 'H'});
 model.geom(geom_id).feature('space').set('selresultshow', 'all');
 model.geom(geom_id).feature('space').set('pos', {'XleftBoundary' '0'});
 
- model.geom(geom_id).create('entireSurface', 'BoxSelection');
+model.geom(geom_id).create('entireSurface', 'BoxSelection');
 model.geom(geom_id).feature('entireSurface').set('entitydim', '1');
 model.geom(geom_id).feature('entireSurface').label('entireSurface');
 model.geom(geom_id).feature('entireSurface').set('condition', 'inside');
@@ -94,7 +141,6 @@ model.geom(geom_id).inputParam().set('lambdaD','0.1','Debye length');
 model.geom(geom_id).inputParam().set('W','1','width of electrochemical cell');
 % model.geom(geom_id).inputParam().set('H','1','height of electrochemical cell');
 model.geom(geom_id).inputParam().set('XleftBoundary','-0.5','x position of cell''s left boundary');
-
 model.geom(geom_id).localParam().set('XrightBoundary','XleftBoundary+W','x position of cell''s right boundary');
 
 
@@ -157,8 +203,24 @@ model.geom(geom_id).feature('bpeSurface').set('input', {'entireSurface'});
 % %     model.geom(geom_id).run('fin');
 
 %% geometry sequences
-m.updateParameters;
+% needs parameters
+% makeParameterFile
+model.param().loadFile(files('parameterFile'));
 
+% 1d geometry
+% bulk geometry
+model.modelNode.create('simple1dGeometryComp');
+model.geom.create('simple1dGeometry',1);
+model.geom('simple1dGeometry').label('simple1dGeometry');
+model.geom('simple1dGeometry').repairTol(1.0E-16);
+model.geom('simple1dGeometry').create('simple1dGeometryPartInstance','PartInstance');
+model.geom('simple1dGeometry').feature('simple1dGeometryPartInstance').set('part','simple1dGeometryPart');
+model.geom('simple1dGeometry').feature('simple1dGeometryPartInstance').setEntry('inputexpr', 'lambdaD', 'lambdaD');
+model.geom('simple1dGeometry').feature('simple1dGeometryPartInstance').setEntry('inputexpr', 'L', '(1+extendedDdlFactor)*lambdaD');
+model.geom('simple1dGeometry').feature('fin').label('Form Union');
+model.geom('simple1dGeometry').feature('fin').set('repairtol', '1.0E-16');
+model.geom('simple1dGeometry').feature('fin').set('action', 'union');
+model.geom('simple1dGeometry').run('fin');
 
 % bulk geometry
 model.modelNode.create('simpleBulkGeometryComp');
@@ -552,14 +614,55 @@ a_lat = m.intFirstDebyeLength(end);
 
 % N_lat_end = ceil((obj.w_mesh-obj.epsilon) / a_lat);
 
+% jumped 2 debye lengths
+% hmax = m.intRemaining(end);
+% 
+% r_zeta = m.intRemaining(1)/m.intFirstDebyeLength(end);
+% a_zeta = m.intRemaining(1);
+% 
+% r_bulk = m.intRemaining(1)/m.intFirstDebyeLength(end);
+% a0_bulk = m.intRemaining(1);
+% aN_bulk = a0_bulk*R^N;
+
 hmax = m.intRemaining(end);
 
-r_zeta = m.intRemaining(1)/m.intFirstDebyeLength(end);
-a_zeta = m.intRemaining(1);
+r_zeta = m.intFirstDebyeLength(end)/m.intFirstDebyeLength(end-1);
+a_zeta = m.intExtendedDdl(1);
 
-r_bulk = m.intRemaining(1)/m.intFirstDebyeLength(end);
+r_bulk = m.intRemaining(2)/m.intRemaining(1);
 a0_bulk = m.intRemaining(1);
 aN_bulk = a0_bulk*R^N;
+
+% 1d geometry 
+model.mesh.create('simple1dGeometryRefinedMesh', 'simple1dGeometry');
+model.mesh('simple1dGeometryRefinedMesh').create('edg1', 'Edge'); % ddl
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').create('dis1', 'Distribution');
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').create('size1', 'Size');
+
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').selection.geom(1);
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').selection.all;
+
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('dis1').selection.named('simple1dGeometry_simple1dGeometryPartInstance_ddl_dom');
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('dis1').set('type','explicit');
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('dis1').set('explicit', m.distributionFirstDebyeLengthStr);
+
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').selection.named('simple1dGeometry_simple1dGeometryPartInstance_zetaVertex');
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('custom', 'on');
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hmaxactive', true);
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hgrad', r_zeta);
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hmax', sprintf('%e*L',a_zeta));
+model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hgradactive', true);
+
+model.mesh('simple1dGeometryRefinedMesh').feature('size').set('custom', 'on');
+model.mesh('simple1dGeometryRefinedMesh').feature('size').set('hmin', sprintf('%e*L',a0));
+model.mesh('simple1dGeometryRefinedMesh').feature('size').set('hgrad', r_zeta);
+model.mesh('simple1dGeometryRefinedMesh').feature('size').set('hmax', sprintf('%e*L',a0_bulk));
+
+model.mesh('simple1dGeometryRefinedMesh').run;
+model.mesh('simple1dGeometryRefinedMesh').export.set('type', 'nativeascii');
+simple1dGeometryRefinedMeshFile = [pwd,'\',m.projectPath,'\simple1dGeometryRefinedMesh.mphtxt'];
+files('simple1dGeometryRefinedMeshFile') = simple1dGeometryRefinedMeshFile;
+model.mesh('simple1dGeometryRefinedMesh').export(simple1dGeometryRefinedMeshFile);
 
 % bulk geometry 
 model.mesh.create('simpleBulkGeometryRefinedMesh', 'simpleBulkGeometryWithMeshingEntities');
@@ -607,8 +710,8 @@ model.mesh('simpleBulkGeometryRefinedMesh').run;
 model.mesh('simpleBulkGeometryRefinedMesh').export.set('type', 'nativeascii');
 simpleBulkGeometryRefinedMeshFile = [pwd,'\',m.projectPath,'\simpleBulkGeometryRefinedMesh.mphtxt'];
 % model.mesh('simpleBulkGeometryRefinedMesh').export.set('filename', 'D:\windows\Users\jotelha\Google Docs\johnny\matlab\jlhbpe\2016_06_projects\dat\2016_06_13_18_52_56_geometryPartFile\simpeDdlGeometryRefinedMesh.mphtxt');
+files('simpleBulkGeometryRefinedMeshFile') = simpleBulkGeometryRefinedMeshFile;
 model.mesh('simpleBulkGeometryRefinedMesh').export(simpleBulkGeometryRefinedMeshFile);
-
 
 % ddl geometry
 
@@ -671,6 +774,7 @@ model.mesh('simpleDdlGeometryRefinedMesh').run;
 
 model.mesh('simpleDdlGeometryRefinedMesh').export.set('type', 'nativeascii');
 simpleDdlGeometryRefinedMeshFile = [pwd,'\',m.projectPath,'\simpleDdlGeometryRefinedMesh.mphtxt'];
+files('simpleDdlGeometryRefinedMeshFile') = simpleDdlGeometryRefinedMeshFile;
 model.mesh('simpleDdlGeometryRefinedMesh').export(simpleDdlGeometryRefinedMeshFile);
 
 m.saveState;
@@ -678,15 +782,17 @@ m.saveState;
 %% save information on created files
 geometryPartsProjectName = m.projectName;
 geometryPartsMphFile = char(m.m.getFilePath);
+files('geometryPartsMphFile') = geometryPartsMphFile;
 
-toSave = {'geometryPartsProjectName','geometryPartsMphFile','simpleBulkGeometryRefinedMeshFile','simpleDdlGeometryRefinedMeshFile'};
-N = numel(toSave);
-dat = cell(N,1);
-for i=1:N
-    dat{i} = eval(toSave{i});
-end
-T = cell2table(dat,'RowNames',toSave);
-writetable(T,'geometryPartsFile.txt','WriteRowNames',true,'WriteVariableNames',false,'Delimiter',' ');
+jlh.hf.saveMapAsTxt(files,'globalFiles.txt');
+% toSave = {'geometryPartsProjectName','geometryPartsMphFile','simpleBulkGeometryRefinedMeshFile','simpleDdlGeometryRefinedMeshFile'};
+% N = numel(toSave);
+% dat = cell(N,1);
+% for i=1:N
+%     dat{i} = eval(toSave{i});
+% end
+% T = cell2table(dat,'RowNames',toSave);
+% writetable(T,'geometryPartsFile.txt','WriteRowNames',true,'WriteVariableNames',false,'Delimiter',' ');
 % save('geometryPartsFile.mat',toSave{:},'-mat');
 
 % simpleDdlGeometryProjectName = m.projectName;

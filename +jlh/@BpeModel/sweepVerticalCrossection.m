@@ -1,16 +1,15 @@
 function sweepVerticalCrossection(obj,dset,stepSize,left,right,lower,upper)
- % stepSize ain fractions of L
     if ~exist('left','var')
-        left = -obj.w_bpe/2-obj.w_bulkLeft;
+        left = 'XleftBoundary';
     end
     if ~exist('right','var')
-        right = obj.w_bpe/2+obj.w_bulkRight;
+        right = 'XrightBoundary';
     end
     if ~exist('lower','var')
-        lower = 0;
+        lower = '0';
     end
     if ~exist('upper','var')
-        upper = 1;
+        upper = 'H';
     end
     if isnumeric(lower)
         lower = num2str(lower);
@@ -18,7 +17,6 @@ function sweepVerticalCrossection(obj,dset,stepSize,left,right,lower,upper)
     if isnumeric(upper)
         upper = num2str(upper);
     end
-    % stepSize ain fractions of L
 
     obj.m.result.dataset('multiPurposeCutLine').set('data', dset);
     obj.m.result.dataset('multiPurposeCutLine').label('multiPurposeCutLine');

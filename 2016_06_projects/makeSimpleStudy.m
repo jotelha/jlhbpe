@@ -4,9 +4,11 @@
 
 % pname = {'phi_bpe_init','phi_bpe','surfaceFluxRampFactor', 'deltaPhi'};
 % plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
-pname = {'deltaPhi','surfaceFluxRampFactor'};
+if ~exist('pname','var')
+    pname = {'deltaPhi','surfaceFluxRampFactor'};
 % pval = cellstr( cellfun(@(c) num2str(c), sweepPhiInitValues,'UniformOutput',false));
-plistarr = ['1'; '1'];
+    plistarr = {'1'; '1'};
+end
 
 punit = '';
 useparam = 'on';
@@ -70,9 +72,9 @@ model.sol(sol_id).feature(solver_id).set('stol', '1e-3');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'const');
 model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
-model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermconst', 'itertol');
+% model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermconst', 'itertol');
 model.sol(sol_id).feature(solver_id).feature('fcDef').set('niter', '15');
-% model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermauto', 'itertol');
+model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermauto', 'itertol');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('minsteph', '1.0E-16');
 model.sol(sol_id).feature(solver_id).feature('pDef').set('sweeptype', 'filled');
 model.sol(sol_id).feature(solver_id).feature('pDef').set('pcontinuationmode', pcontinuationmode);

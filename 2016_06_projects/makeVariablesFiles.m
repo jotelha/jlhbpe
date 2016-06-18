@@ -122,8 +122,11 @@ c0TermTertiary2d = prepTerm('c_bulk_id','c_bulk_id',m.c_bulk_id);
 phi0TermTertiary2d = '-(x-(XrightBoundary+XleftBoundary))/W*DeltaPHI';
 % phi0Term = 'smoothenBpeBC(x)*phiInterpolation(y)';
 
-c0TermDilutedSpecies1d = prepTerm('c_bulk_id+smoothenBpeBC(X/L)*(cOHmInterpolation(y/L)*c_ref-c_bulk_id)','c_bulk_id',m.c_bulk_id);
-phi0TermElectrostatics1d = 'smoothenBpeBC(X/L)*phiInterpolation(y/L)*UT';
+% c0TermDilutedSpecies1d = prepTerm('c_bulk_id+smoothenBpeBC(X/L)*(cOHmInterpolation(x)-c_bulk_id)','c_bulk_id',m.c_bulk_id);
+c0TermDilutedSpecies1d = prepTerm('c_id_bulk_ddl(X)*exp(-z_id*(phi0-phi_bulk_ddl(X))/UT)','c_id','z_id',m.c_id,m.z_id);
+
+% phi0TermElectrostatics1d = 'smoothenBpeBC(X/L)*phiInterpolation(x)';
+phi0TermElectrostatics1d = '(PHI_bpe-phi_bulk_ddl(X))*pbDecayFunction(x)+phi_bulk_ddl(X)';
 
 %% Diluted Species and Electrostatics, 1d
 
@@ -147,7 +150,7 @@ domainVariables('kappa_loc') = kappaTerm;
 
 % surface variable
 surfaceVariables('phi_s') = 'PHI_bpe';
-surfaceVariables('V') = { '(phi_s-phi)*UT', 'Metal - reaction plane potential difference, with dimension'};
+surfaceVariables('V') = { 'phi_s-phi_bulk_ddl(X)', 'Metal - reaction plane potential difference, with dimension'};
 
 surfaceVariables('i_cathodic') = {cathodicCurrent, 'Cathodic current due to surface reactions. A positive cathodic current means charge flux into the electrolyte domain.'};
 surfaceVariables('ii_cathodic') = {cathodicCurrentDimless, 'Dimensionless cathodic current due to surface reactions. A positive cathodic current means charge flux into the electrolyte domain.'};
@@ -262,3 +265,6 @@ writeParameterTextFile(domainVariables,files('domainVariablesTertiaryCurrentDist
 writeParameterTextFile(surfaceVariables,files('surfaceVariablesTertiaryCurrentDistribution2d'));
 writeParameterTextFile(weVariables,files('weVariablesTertiaryCurrentDistribution2d'));
 writeParameterTextFile(ceVariables,files('ceVariablesTertiaryCurrentDistribution2d'));
+
+%% save file records
+jlh.hf.saveMapAsTxt(files,'globalFiles.txt');

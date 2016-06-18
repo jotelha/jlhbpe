@@ -196,6 +196,4 @@ function obj = update1dParametricPlots(obj,dset,plotDset)
             end
          end
     end    
-end
-              
-                    
+end              

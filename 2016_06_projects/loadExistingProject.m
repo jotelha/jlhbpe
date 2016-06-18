@@ -3,28 +3,32 @@ import com.comsol.model.util.*
 import jlh.*
 import jlh.hf.*
 
-files = containers.Map;
-
-%% create new project
+%% restore BpeModel settings
 
 if ~exist('caseStudyParameterFile','var')
     caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 end
 
+
 m = jlh.BpeModel;
+m.projectName = tag;
+m.projectPath = ['dat\',tag];
+m.model_tag = tag;
+
 fprintf('Calling %s...\n',caseStudyParameterFile);
 run(caseStudyParameterFile);
 m.prepareIdentifiers;
 
-if ~exist('caseStudyTitle','var')
-    caseStudyTitle = 'emptyProject';
+%% load model either from server or from file
+tags = arrayfun(@(c) char(c),ModelUtil.tags,'UniformOutput',false); 
+if any(strcmp(tags,m.model_tag))
+    fprintf('Model %s exists on server, will be restored...\n',m.model_tag);
+    m.m = ModelUtil.model(m.model_tag);
+else
+    mphFile = [m.projectPath,'\',m.projectName,'.mph'];
+    fprintf('Model %s does not exist on server, loaded from file %s...',m.model_tag,mphFile);
+    m.m = mphload(mphFile,m.model_tag);
 end
-if ~exist('caseStudyTitleSuffix','var')
-    caseStudyTitleSuffix = '';
-end
-
-m.newProject([caseStudyTitle,caseStudyTitleSuffix]);
-
 %% run logger
 % also necessary to execute when loading
 
@@ -49,12 +53,3 @@ cmd = prepTerm('spawn mTail "logFile" /start','spawn','mTail','logFile',spawn,mT
 % spawn helper script yields logger pid
 [status,cmdout] = system(cmd{1},'-echo');
 loggerPid = str2double(cmdout);
-
-
-%% remove other models from server, create COMSOL empty model
-loadedModels    = ModelUtil.tags;
-isLoaded        = arrayfun( @(s) strcmp(m.model_tag,s),loadedModels);
-if any(isLoaded)
-    ModelUtil.remove(m.model_tag);
-end
-m.m = ModelUtil.create(m.model_tag);   % creates model on COMSOL server

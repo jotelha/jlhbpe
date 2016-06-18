@@ -28,6 +28,6 @@ function sweepHorizontalCrossection(obj,dset,stepSize,left,right,lower,upper,plo
 %     for pos=( (-m.w_bpe/2-m.w_insulatorLeft):stepSize:(m.w_bpe/2+m.w_insulatorRight) )
     for pos=( lower:stepSize:upper )
         obj.m.result.dataset('multiPurposeCutLine').set('genpoints', { left num2str(pos);  right num2str(pos)});
-        obj.plotAlongCrossection('multiPurposeCutLine','x',plots,sprintf('horizontalCrossection_%.3e',pos));
+        plotAlongCrossection('multiPurposeCutLine','x',sprintf('horizontalCrossection_%.3f',pos),plots);
     end
 end
