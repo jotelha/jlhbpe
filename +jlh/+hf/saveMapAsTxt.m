@@ -7,6 +7,10 @@ function saveMapAsTxt(map,txt)
     comment(hasDesc) = cellfun(@(c) c{2}, value(hasDesc),'UniformOutput',false);
     value(hasDesc) = cellfun(@(c) c{1}, value(hasDesc),'UniformOutput',false);
 
-    T = table(key,value,comment);
+    if all(cellfun(@(c) isempty(c),comment))
+        T = table(key,value);
+    else
+        T = table(key,value,comment);
+    end
     writetable(T,txt,'WriteRowNames',false,'WriteVariableNames',false,'Delimiter',' ');
 end

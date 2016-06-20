@@ -3,7 +3,9 @@ import com.comsol.model.util.*
 import jlh.*
 import jlh.hf.*
 
-files = containers.Map;
+if ~exist('files','var')
+    files = containers.Map;
+end
 
 %% create new project
 

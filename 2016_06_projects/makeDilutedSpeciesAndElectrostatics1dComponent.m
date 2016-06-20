@@ -11,7 +11,7 @@ model.mesh.create('dilutedSpeciesAndElectrostatics1dMesh', 'dilutedSpeciesAndEle
 % model.mesh('dilutedSpeciesAndElectrostatics1dMesh').create('copy1', 'Copy');
 
 % since copy not possible for 1d, explicit:
-m.hMaxFactor = 0.1;
+m.hMaxFactor = 0.01;
 m.mesh1D();
 
 r = m.intFirstDebyeLength(2)/m.intFirstDebyeLength(1);
@@ -34,12 +34,12 @@ model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('dis
 model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('dis1').set('type','explicit');
 model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('dis1').set('explicit', m.distributionFirstDebyeLengthStr);
 
-model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').selection.named('dilutedSpeciesAndElectrostatics1dGeometry_simple1dGeometryPartInstance1_zetaVertex');
-model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('custom', 'on');
-model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hmaxactive', true);
-model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hgrad', r_zeta);
-model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hmax', sprintf('%e*L',a_zeta));
-model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hgradactive', true);
+% model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').selection.named('dilutedSpeciesAndElectrostatics1dGeometry_simple1dGeometryPartInstance1_zetaVertex');
+% model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('custom', 'on');
+% model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hmaxactive', true);
+% model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hgrad', r_zeta);
+% model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hmax', sprintf('%e*L',a_zeta));
+% model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('edg1').feature('size1').set('hgradactive', true);
 
 model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('size').set('custom', 'on');
 model.mesh('dilutedSpeciesAndElectrostatics1dMesh').feature('size').set('hmin', sprintf('%e*L',a0));
@@ -78,6 +78,7 @@ model.physics.create('Electrostatics', 'Electrostatics', 'dilutedSpeciesAndElect
 model.physics('DilutedSpecies').feature.create('BulkConcentration', 'Concentration', 0);
 % model.physics('TertiaryCurrentDistribution').feature.create('BpeSurface', 'ExternalElectrodeSurface', 1);
 model.physics('DilutedSpecies').feature.create('SurfaceFlux', 'Fluxes', 0);
+model.physics('DilutedSpecies').feature.create('BulkFlux', 'Fluxes', 0);
 
 model.physics('Electrostatics').feature.create('SpaceChargeDensity', 'SpaceChargeDensity', 1);
 model.physics('Electrostatics').feature.create('SurfaceChargeDensity', 'SurfaceChargeDensity', 0);
@@ -185,7 +186,8 @@ model.cpl('onSurface').set('opname','onSurface');
 model.cpl('onSurface').selection.geom('dilutedSpeciesAndElectrostatics1dGeometry', 0);
 model.cpl('onSurface').selection.named('dilutedSpeciesAndElectrostatics1dGeometry_simple1dGeometryPartInstance1_surfaceVertex');
 model.cpl('onSurface').selection('srcvertex1').set(1); % order of vertex creation important
-model.cpl('onSurface').selection('dstvertex1').set(3);
+% model.cpl('onSurface').selection('dstvertex1').set(3);
+model.cpl('onSurface').selection('dstvertex1').set(2);
 
 model.cpl('intSurface').selection.geom('dilutedSpeciesAndElectrostatics1dGeometry', 0);
 model.cpl('intSurface').selection.named('dilutedSpeciesAndElectrostatics1dGeometry_simple1dGeometryPartInstance1_surfaceVertex');

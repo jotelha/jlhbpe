@@ -18,7 +18,11 @@ function plotGlobal1d(obj,dset,par,plots,plotDset)
     fullProjectPath = [pwd(),'\',obj.projectPath];
 
     % subfolder for dataset:
-    dsetSubFolder = [fullProjectPath,'\',plotDset];
+    solution1dSubFolder = [fullProjectPath,'\solution1d'];
+    if( ~exist( solution1dSubFolder,'dir') )
+        mkdir(solution1dSubFolder);
+    end
+    dsetSubFolder = [solution1dSubFolder,'\',plotDset];
     if( ~exist( dsetSubFolder,'dir') )
         mkdir(dsetSubFolder);
     end
@@ -52,6 +56,8 @@ function plotGlobal1d(obj,dset,par,plots,plotDset)
     cellPos = 1;
     rowPos = ones(1,nParameters);
     cfgCount = 1;
+    
+    nExpressionsMax = 1;
     while(cellPos > 0)
         if( cellPos ~= plotParameterPosition )
         end
@@ -92,8 +98,23 @@ function plotGlobal1d(obj,dset,par,plots,plotDset)
                     obj.m.result('globalPlotGroup').set('xlabelactive', false);
                     obj.m.result('globalPlotGroup').set('innerinput', 'manual');
                     obj.m.result('globalPlotGroup').set('solnum', solnumStr);
-                    obj.m.result('globalPlotGroup').feature('globalPlot').set('expr', expressions{i});
                     
+                    curExp = expressions{i};
+                    nCurExp = numel(curExp);
+                    
+%                     if nCurExp > nExpressionsMax
+%                         nExpressionsMax = nCurExp;
+%                     end
+                    obj.m.result('globalPlotGroup').feature('globalPlot').set('expr','');
+%                     for j=1:nExpressionsMax
+                    for j=1:nCurExp
+%                         if j <= nCurExp
+                            obj.m.result('globalPlotGroup').feature('globalPlot').setIndex('expr', curExp{j},j-1);
+%                         else
+%                             obj.m.result('globalPlotGroup').feature('globalPlot').setIndex('expr', '',j-1);
+%                         end   
+                    end
+                                   
                     obj.m.result.export('plotExporter1d').set('plotgroup', 'globalPlotGroup');
                     fileName = sprintf(fileNameTemplate,titles{i});
                     obj.m.result.export('plotExporter1d').set('pngfilename', fileName);

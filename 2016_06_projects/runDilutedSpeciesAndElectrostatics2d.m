@@ -7,7 +7,7 @@ if ~exist('caseStudyParameterFile','var')
     caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 end
 
-caseStudyTitle = 'dilutedSpeciesAndElectrostatics1d';
+caseStudyTitle = 'dilutedSpeciesAndElectrostatics2d';
 createEmptyProject;
 
 % or, to load an existing project from server or from file
@@ -32,35 +32,56 @@ model.param().loadFile(files('parameterFile'));
 % mesh parts
 
 model.modelNode.create('mcomp1', 'MeshComponent');
-model.geom.create('mgeom1', 1); % mesh geometry
-model.mesh.create('simple1dGeometryRefinedMeshPart', 'mgeom1');
-model.mesh('simple1dGeometryRefinedMeshPart').create('imp1', 'Import');
-model.mesh('simple1dGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
-model.mesh('simple1dGeometryRefinedMeshPart').feature('imp1').set('filename', files('simple1dGeometryRefinedMeshFile'));
-model.mesh('simple1dGeometryRefinedMeshPart').run;
+model.geom.create('mgeom1', 2); % mesh geometry
+model.mesh.create('simpleBulkGeometryRefinedMeshPart', 'mgeom1');
+model.mesh('simpleBulkGeometryRefinedMeshPart').create('imp1', 'Import');
+model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
+model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleBulkGeometryRefinedMeshFile'));
+model.mesh('simpleBulkGeometryRefinedMeshPart').run;
+% model.mesh('mpart1').feature('imp1').set('facepartition', 'auto');
+
+model.modelNode.create('mcomp2', 'MeshComponent');
+model.geom.create('mgeom2', 2); % mesh geometry
+model.mesh.create('simpleDdlGeometryRefinedMeshPart', 'mgeom2');
+model.mesh('simpleDdlGeometryRefinedMeshPart').create('imp1', 'Import');
+model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
+model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleDdlGeometryRefinedMeshFile'));
+model.mesh('simpleDdlGeometryRefinedMeshPart').run;
 
 %%
-makeDilutedSpeciesAndElectrostatics1dComponent
+makeDilutedSpeciesAndElectrostatics2dComponent
 
-pname = {'X'};
-plistarr = {'range(XleftBoundary,W/100,XrightBoundary)'};
+pname = {};
+plistarr = {};
 makeSimpleStudy
 % tags of created features in sol_id, study_id, studyStep_id, compile_id,
 % variables_id, solver_id and store_id
 
 % adaption for 1d study
 
-model.study(study_id).feature(studyStep_id).set('pname', pname);
-model.study(study_id).feature(studyStep_id).set('plistarr', plistarr);
-model.sol(sol_id).feature(solver_id).feature('pDef').set('pname', pname); 
-model.sol(sol_id).feature(solver_id).feature('pDef').set('plistarr', plistarr);
+% model.study(study_id).feature(studyStep_id).set('pname', pname);
+% model.study(study_id).feature(studyStep_id).set('plistarr', plistarr);
+% model.sol(sol_id).feature(solver_id).feature('pDef').set('pname', pname); 
+% model.sol(sol_id).feature(solver_id).feature('pDef').set('plistarr', plistarr);
+% 
+% model.study(study_id).feature(studyStep_id).set('preusesol', 'yes');
+% 
+% model.sol(sol_id).feature(solver_id).set('stol', '1e-14');
+% model.sol(sol_id).feature(solver_id).set('keeplog', 'on');
+% model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'auto');
+% model.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
 
-model.study(study_id).feature(studyStep_id).set('preusesol', 'yes');
+% model.study('study1').feature('stationaryStudyStep1').remove('pname', 0);
+% model.study('study1').feature('stationaryStudyStep1').remove('punit', 0);
+% model.study('study1').feature('stationaryStudyStep1').remove('plistarr', 0);
+model.study('study1').feature('stationaryStudyStep1').set('useparam', 'off');
+model.study('study1').feature('stationaryStudyStep1').set('showdistribute', true);
 
-model.sol(sol_id).feature(solver_id).set('stol', '1e-14');
-model.sol(sol_id).feature(solver_id).set('keeplog', 'on');
-model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'auto');
-model.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
+model.sol('sol1').feature('v1').set('scalemethod', 'auto');
+model.sol('sol1').feature('s1').set('keeplog', 'on');
+model.sol('sol1').feature('s1').feature('fcDef').set('dtech', 'auto');
+model.sol('sol1').feature('s1').feature('fcDef').set('ntermauto', 'tol');
+model.sol('sol1').feature('s1').feature('dDef').set('ooc', 'on');
 
 model.sol(sol_id).run(store_id);
 
@@ -216,7 +237,6 @@ plots('i_cathodic')   = { {'intSurface(i_cathodic)'}, 'I / A m^-2'};
 plots('i_anodic')   = { {'intSurface(i_anodic)'}, 'I / A m^-2' };
 plots('log_i_cathodic')   = { {'log(abs(intSurface(i_cathodic)))'}, 'I / A m^-2'};
 plots('log_i_anodic')   = { {'log(abs(intSurface(i_anodic)))'}, 'I / A m^-2' };
-plots('log_i')   = { {'log(abs(intSurface(i_cathodic)))','log(abs(intSurface(i_anodic)))'}, 'I / A m^-2' };
 for i = 1:m.nReactions
         plots(m.i_id{i}) = { { sprintf('intSurface(%s)',m.i_id{i}) },  'I / A m^-2'};
 end

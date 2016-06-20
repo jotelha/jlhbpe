@@ -266,5 +266,15 @@ writeParameterTextFile(surfaceVariables,files('surfaceVariablesTertiaryCurrentDi
 writeParameterTextFile(weVariables,files('weVariablesTertiaryCurrentDistribution2d'));
 writeParameterTextFile(ceVariables,files('ceVariablesTertiaryCurrentDistribution2d'));
 
+%% Diluted Species and Electrostatics, 2d
+files('domainVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\domainVariablesDilutedSpeciesAndElectrostatics2d.txt'];
+files('surfaceVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\surfaceVariablesDilutedSpeciesAndElectrostatics2d.txt'];
+files('weVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\weVariablesDilutedSpeciesAndElectrostatics2d.txt'];
+files('ceVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\ceVariablesDilutedSpeciesAndElectrostatics2d.txt'];
+writeParameterTextFile(domainVariables,files('domainVariablesDilutedSpeciesAndElectrostatics2d'));
+writeParameterTextFile(surfaceVariables,files('surfaceVariablesDilutedSpeciesAndElectrostatics2d'));
+writeParameterTextFile(weVariables,files('weVariablesDilutedSpeciesAndElectrostatics2d'));
+writeParameterTextFile(ceVariables,files('ceVariablesDilutedSpeciesAndElectrostatics2d'));
+
 %% save file records
 jlh.hf.saveMapAsTxt(files,'globalFiles.txt');

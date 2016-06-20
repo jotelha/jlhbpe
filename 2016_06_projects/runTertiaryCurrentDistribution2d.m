@@ -64,6 +64,8 @@ storedSolutions = model.study(study_id).getSolverSequences('Stored');
 solInfo = mphsolinfo(model,'soltag',char(storedSolutions(1)));
 dset = char(solInfo.dataset);
 
+m.saveState;
+
 createPlots
 
 %%
@@ -166,6 +168,13 @@ model.result.export('exportTertiaryCurrentDistributionData').set('location', 'gr
 model.result.export('exportTertiaryCurrentDistributionData').set('gridx2', 'range( XleftBoundary, W/1000, XrightBoundary)');
 model.result.export('exportTertiaryCurrentDistributionData').set('gridy2', '0');
 model.result.export('exportTertiaryCurrentDistributionData').set('filename', files('exportTertiaryCurrentDistributionDataFile'));
+model.result.export('exportTertiaryCurrentDistributionData').run;
+
+% full
+files('exportTertiaryCurrentDistribution2dDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistribution2dDataFile.txt'];
+
+model.result.export('exportTertiaryCurrentDistributionData').set('location', 'fromdataset');
+model.result.export('exportTertiaryCurrentDistributionData').set('filename', files('exportTertiaryCurrentDistribution2dDataFile'));
 model.result.export('exportTertiaryCurrentDistributionData').run;
 
 jlh.hf.saveMapAsTxt(files,'globalFiles.txt');

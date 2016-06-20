@@ -33,11 +33,11 @@ model.geom(geom_id).feature('ddl').set('p','0,lambdaD');
 model.geom(geom_id).feature('ddl').set('selresult', 'on');
 model.geom(geom_id).feature('ddl').set('selresultshow', 'all');
 
-model.geom(geom_id).create('space', 'Interval');
-model.geom(geom_id).feature('space').label('space');
-model.geom(geom_id).feature('space').set('p','lambdaD,L');
-model.geom(geom_id).feature('space').set('selresult', 'on');
-model.geom(geom_id).feature('space').set('selresultshow', 'all');
+% model.geom(geom_id).create('space', 'Interval');
+% model.geom(geom_id).feature('space').label('space');
+% model.geom(geom_id).feature('space').set('p','lambdaD,L');
+% model.geom(geom_id).feature('space').set('selresult', 'on');
+% model.geom(geom_id).feature('space').set('selresultshow', 'all');
 
 model.geom(geom_id).create('surfaceVertex', 'BoxSelection');
 model.geom(geom_id).feature('surfaceVertex').set('entitydim', '0');
@@ -49,14 +49,14 @@ model.geom(geom_id).create('bulkVertex', 'BoxSelection');
 model.geom(geom_id).feature('bulkVertex').set('entitydim', '0');
 model.geom(geom_id).feature('bulkVertex').label('bulkVertex');
 model.geom(geom_id).feature('bulkVertex').set('condition', 'inside');
-model.geom(geom_id).feature('bulkVertex').set('xmin', 'L-lambdaD/2');
+model.geom(geom_id).feature('bulkVertex').set('xmin', 'lambdaD/2');
 
 model.geom(geom_id).create('zetaVertex', 'BoxSelection');
 model.geom(geom_id).feature('zetaVertex').set('entitydim', '0');
 model.geom(geom_id).feature('zetaVertex').label('zetaVertex');
 model.geom(geom_id).feature('zetaVertex').set('condition', 'inside');
 model.geom(geom_id).feature('zetaVertex').set('xmin', 'lambdaD/2');
-model.geom(geom_id).feature('zetaVertex').set('xmax', 'L-lambdaD/2');
+% model.geom(geom_id).feature('zetaVertex').set('xmax', 'L-lambdaD/2');
 
 %% simple rectangular bulk geometry part
 geom_id = 'simpleBulkGeometryPart';
@@ -646,12 +646,12 @@ model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('dis1').select
 model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('dis1').set('type','explicit');
 model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('dis1').set('explicit', m.distributionFirstDebyeLengthStr);
 
-model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').selection.named('simple1dGeometry_simple1dGeometryPartInstance_zetaVertex');
-model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('custom', 'on');
-model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hmaxactive', true);
-model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hgrad', r_zeta);
-model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hmax', sprintf('%e*L',a_zeta));
-model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hgradactive', true);
+% model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').selection.named('simple1dGeometry_simple1dGeometryPartInstance_zetaVertex');
+% model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('custom', 'on');
+% model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hmaxactive', true);
+% model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hgrad', r_zeta);
+% model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hmax', sprintf('%e*L',a_zeta));
+% model.mesh('simple1dGeometryRefinedMesh').feature('edg1').feature('size1').set('hgradactive', true);
 
 model.mesh('simple1dGeometryRefinedMesh').feature('size').set('custom', 'on');
 model.mesh('simple1dGeometryRefinedMesh').feature('size').set('hmin', sprintf('%e*L',a0));
