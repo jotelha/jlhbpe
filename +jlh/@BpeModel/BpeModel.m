@@ -66,6 +66,8 @@ classdef BpeModel < handle
 %         gamma = 0.001; % relation Debye length : simulation domain width, lambdaD / W0
         beta  = 0.0009;
         
+        h % height of cell
+        
         % l = 1;
 %         w % = W/L = epsilon*W/lambda_D
         w_bpe
@@ -188,6 +190,7 @@ classdef BpeModel < handle
         UT;
         
         L
+        H
         w
         W
         Wbpe
@@ -458,8 +461,9 @@ classdef BpeModel < handle
             v = obj.lambdaD/obj.epsilon;
         end
         function v = get.w(obj)
-            v = obj.w_bulkLeft + obj.w_cathode + obj.w_insulatorLeft + ...
-                obj.w_bpe + obj.w_insulatorRight + obj.w_anode + obj.w_bulkRight;
+%             v = obj.w_bulkLeft + obj.w_cathode + obj.w_insulatorLeft + ...
+%                 obj.w_bpe + obj.w_insulatorRight + obj.w_anode + obj.w_bulkRight;
+            v = obj.w_bulkLeft + obj.w_bpe + obj.w_bulkRight;
         end 
         function v = get.w_mesh(obj)
             v = obj.w_bpe/obj.nMeshChops;
@@ -470,7 +474,10 @@ classdef BpeModel < handle
         function v = get.nSegmentsPerChop(obj)
             v = round(obj.w_mesh/obj.elementSizeAtSurface);
         end
-            
+          
+        function v = get.H(obj)
+            v = obj.lambdaD*obj.h/obj.epsilon;
+        end 
         function v = get.W(obj)
             v = obj.lambdaD*obj.w/obj.epsilon;
         end 
@@ -498,6 +505,9 @@ classdef BpeModel < handle
 %         function set.W(obj,v)
 %             obj.w = obj.epsilon*v/obj.lambdaD;
 %         end 
+        function set.H(obj,v)
+            obj.h = obj.epsilon*v/obj.lambdaD;
+        end
         function set.Wbpe(obj,v)
             obj.w_bpe = obj.epsilon*v/obj.lambdaD;
         end

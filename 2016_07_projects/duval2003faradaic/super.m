@@ -4,7 +4,7 @@
 caseStudyParameterFile = 'parameters_duval2003faradaic.m';
 caseStudyTitleSuffix = '_duval2003faradaic';
 
-makeGeometryPartFile 
+makeGeometryPartFileMacro
 
 runTertiaryCurrentDistribution2d
 runDilutedSpeciesAndElectrostatics1dSweep

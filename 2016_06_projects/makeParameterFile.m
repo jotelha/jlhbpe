@@ -72,7 +72,11 @@ parameters('surfaceFluxRampFactor') = 1;
 parameters('chargeDensityRampFactor') = 1;
 parameters('deltaPhiRampFactor') = 1;
 % smoothen Bpe BC factor
-parameters('smootheningFactor') = 1;
+if exist('smootheningFactor','var')
+    parameters('smootheningFactor') = smootheningFactor;
+else
+    parameters('smootheningFactor') = 1;
+end
 
 % dimensionless measures
 
@@ -85,15 +89,15 @@ parameters('w_bpe') = {m.w_bpe, 'Width of BPE'};
 parameters('w_bulkLeft') = {m.w_bulkLeft, 'Width of insulating stretch left of system'};
 parameters('w_bulkRight') = {m.w_bulkRight, 'Width of insulating stretch right of system'};
 
-parameters('w_insulatorLeft') = {m.w_insulatorLeft, 'Width of left insulator'};
-parameters('w_insulatorRight') = {m.w_insulatorRight, 'Width of right insulator'};
-parameters('w_cathode') = {m.w_cathode, 'Width of cathode / WE'};
-parameters('w_anode') = {m.w_anode, 'Width of anode / CE'};
+% parameters('w_insulatorLeft') = {m.w_insulatorLeft, 'Width of left insulator'};
+% parameters('w_insulatorRight') = {m.w_insulatorRight, 'Width of right insulator'};
+% parameters('w_cathode') = {m.w_cathode, 'Width of cathode / WE'};
+% parameters('w_anode') = {m.w_anode, 'Width of anode / CE'};
 
-parameters('w_mesh') = {m.w_mesh, 'Mesh chop width'};
-parameters('nMeshChops') = {m.nMeshChops, 'No of mesh chops on BPE'};
-parameters('nSegmentsPerChop') = {m.nSegmentsPerChop, 'No of surface segments per chop'};
-parameters('extendedDdlFactor') = {m.extendedDdlFactor, 'How many debye lengths should mesh refinemend stretch beyond DDL'};
+% parameters('w_mesh') = {m.w_mesh, 'Mesh chop width'};
+% parameters('nMeshChops') = {m.nMeshChops, 'No of mesh chops on BPE'};
+% parameters('nSegmentsPerChop') = {m.nSegmentsPerChop, 'No of surface segments per chop'};
+% parameters('extendedDdlFactor') = {m.extendedDdlFactor, 'How many debye lengths should mesh refinemend stretch beyond DDL'};
 
 parameters('epsilon_r') = {num2str(m.epsilon_r), 'relative permittivity of electrolyte'};
 
@@ -124,7 +128,7 @@ parameters('kappa') = {'lambdaD^(-1)', 'reciprocal of Debye length'};
 parameters('lambdaS') = lambdaS; % width of Stern layer, move to parameter settings
 
 parameters('L') = {lengthL, 'Characteristic length, usually multiple of Debye length'};
-parameters('H') = {'L', 'Cell depth'}; % later add as simulation parameter
+parameters('H') = {attachUnit(m.H,'m'), 'Cell height'};
 
 parameters('W') = {'w*L', 'Cell width'};
 parameters('Wbpe') = {'w_bpe*L', 'Width of BPE'};

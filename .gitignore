@@ -27,3 +27,13 @@
 
 # dat directories
 */dat
+*/dat/*
+
+# data files
+*.csv
+*.txt
+*.mphtxt
+
+# comsol lock files
+*.lock
+

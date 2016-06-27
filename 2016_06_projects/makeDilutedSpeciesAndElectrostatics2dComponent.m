@@ -34,7 +34,7 @@ model.mesh('dilutedSpeciesAndElectrostatics2dMesh').create('copy2', 'Copy');
 
 % functions
 model.func.create('smoothenBpeBC', 'Rectangle');
-model.func.create('interpolateStoredValues1d','Interpolation');
+% model.func.create('interpolateStoredValues1d','Interpolation');
 model.func.create('interpolateStoredValues2d','Interpolation');
 
 
@@ -64,8 +64,8 @@ model.variable.create('ceVariables');
 model.physics.create('DilutedSpecies', 'DilutedSpecies', 'dilutedSpeciesAndElectrostatics2dGeometry', m.c_id);
 model.physics.create('Electrostatics', 'Electrostatics', 'dilutedSpeciesAndElectrostatics2dGeometry');
 
-model.physics('DilutedSpecies').feature.create('init2', 'init', 2);
-model.physics('Electrostatics').feature.create('init2', 'init', 2);
+% model.physics('DilutedSpecies').feature.create('init2', 'init', 2);
+% model.physics('Electrostatics').feature.create('init2', 'init', 2);
 
 model.physics('DilutedSpecies').feature.create('BulkConcentration', 'Concentration', 1);
 % model.physics('TertiaryCurrentDistribution').feature.create('BpeSurface', 'ExternalElectrodeSurface', 1);
@@ -121,32 +121,32 @@ model.func('smoothenBpeBC').set('funcname', 'smoothenBpeBC');
 model.func('smoothenBpeBC').set('lower', '-w_bpe/2');
 
 % interpolate previous ddl results
-model.func('interpolateStoredValues1d').set('source', 'file');
-model.func('interpolateStoredValues1d').set('interp', 'linear');
-
-model.func('interpolateStoredValues1d').setIndex('funcs', 'phi_interp_ddl', 0, 0);
-model.func('interpolateStoredValues1d').setIndex('funcs', num2str(1), 0, 1);
-
-for i=1:m.numberOfSpecies
-    model.func('interpolateStoredValues1d').setIndex('funcs', sprintf('%s_interp_ddl',m.c_id{i}), i, 0);
-    model.func('interpolateStoredValues1d').setIndex('funcs', num2str(i+1), i, 1);
-end
-model.func('interpolateStoredValues1d').set('filename', files('exportDilutedSpeciesAndElectrostatics1dDataFile'));
-model.func('interpolateStoredValues1d').set('nargs', '2');
-model.func('interpolateStoredValues1d').importData;
+% model.func('interpolateStoredValues1d').set('source', 'file');
+% model.func('interpolateStoredValues1d').set('interp', 'linear');
+% 
+% model.func('interpolateStoredValues1d').setIndex('funcs', 'phi_interp', 0, 0);
+% model.func('interpolateStoredValues1d').setIndex('funcs', num2str(1), 0, 1);
+% 
+% for i=1:m.numberOfSpecies
+%     model.func('interpolateStoredValues1d').setIndex('funcs', sprintf('%s_interp',m.c_id{i}), i, 0);
+%     model.func('interpolateStoredValues1d').setIndex('funcs', num2str(i+1), i, 1);
+% end
+% model.func('interpolateStoredValues1d').set('filename', files('exportDilutedSpeciesAndElectrostatics2dDataFile'));
+% model.func('interpolateStoredValues1d').set('nargs', '2');
+% model.func('interpolateStoredValues1d').importData;
 
 % interpolate previous bulk results
 model.func('interpolateStoredValues2d').set('source', 'file');
 model.func('interpolateStoredValues2d').set('interp', 'linear');
 
-model.func('interpolateStoredValues2d').setIndex('funcs', 'phi_interp_bulk', 0, 0);
+model.func('interpolateStoredValues2d').setIndex('funcs', 'phi_interp', 0, 0);
 model.func('interpolateStoredValues2d').setIndex('funcs', num2str(1), 0, 1);
 
 for i=1:m.numberOfSpecies
-    model.func('interpolateStoredValues2d').setIndex('funcs', sprintf('%s_interp_bulk',m.c_id{i}), i, 0);
+    model.func('interpolateStoredValues2d').setIndex('funcs', sprintf('%s_interp',m.c_id{i}), i, 0);
     model.func('interpolateStoredValues2d').setIndex('funcs', num2str(i+1), i, 1);
 end
-model.func('interpolateStoredValues2d').set('filename', files('exportTertiaryCurrentDistribution2dDataFile'));
+model.func('interpolateStoredValues2d').set('filename', files('exportDilutedSpeciesAndElectrostatics2dDataFile'));
 model.func('interpolateStoredValues2d').set('nargs', '2');
 model.func('interpolateStoredValues2d').importData;
 
@@ -225,15 +225,15 @@ model.physics('DilutedSpecies').feature('cdm1').set('V', 'phi');
 model.physics('Electrostatics').feature('ccn1').set('epsilonr_mat', 'userdef');
 model.physics('Electrostatics').feature('ccn1').set('epsilonr', {'epsilon_r' '0' '0' '0' 'epsilon_r' '0' '0' '0' 'epsilon_r'});
 
-model.physics('DilutedSpecies').feature('init2').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
-model.physics('Electrostatics').feature('init2').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
+% model.physics('DilutedSpecies').feature('init2').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
+% model.physics('Electrostatics').feature('init2').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
 
 model.physics('Electrostatics').feature('SpaceChargeDensity').selection.all;
 model.physics('Electrostatics').feature('SpaceChargeDensity').set('rhoq', pdePSourceTerm); % space charge density
 
 % potential initial values
-model.physics('Electrostatics').feature('init1').set('phi', 'phi_interp_bulk(x,y)');
-model.physics('Electrostatics').feature('init2').set('phi', 'phi_interp_ddl(lambdaD+y,x)');
+model.physics('Electrostatics').feature('init1').set('phi', 'phi_interp(x,y)');
+% model.physics('Electrostatics').feature('init2').set('phi', 'phi_interp_ddl(lambdaD+y,x)');
 
 % bc selection
 model.physics('DilutedSpecies').feature('SurfaceFlux').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_bpeSurface');
@@ -244,7 +244,7 @@ model.physics('DilutedSpecies').feature('BulkConcentration').selection.named('di
 % model.physics('Electrostatics').feature('BulkPotential').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simple1dGeometryPartInstance1_bulkVertex');
 model.physics('Electrostatics').feature('ElectrodePotential').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_electrodes');
 
-model.physics('Electrostatics').feature('SurfaceChargeDensity').set('rhoqs', 'smoothenBpeBC(X/L)*C_Stern_dimensional*(phi_s-phi)');
+model.physics('Electrostatics').feature('SurfaceChargeDensity').set('rhoqs', 'smoothenBpeBC(x/L)*C_Stern_dimensional*(phi_s-extrudeZetaPlaneToSurface(phi))');
 % model.physics('Electrostatics').feature('BulkPotential').set('V0', 'phi_bulk_ddl(X)');
 model.physics('Electrostatics').feature('ElectrodePotential').set('V0', 'phi_s'); % feeder electrodes
 
@@ -259,12 +259,12 @@ for i = 1:m.numberOfSpecies
     
     model.physics('DilutedSpecies').feature('BulkConcentration').setIndex('species', true, i-1);
     model.physics('DilutedSpecies').feature('BulkConcentration').setIndex('c0', m.c_bulk_id{i}, i-1);
-    model.physics('DilutedSpecies').feature('init1').setIndex('initc', sprintf('%s_interp_bulk(x,y)',m.c_id{i}), i-1);
-    model.physics('DilutedSpecies').feature('init2').setIndex('initc', sprintf('%s_interp_ddl(lambdaD+y,x)',m.c_id{i}), i-1);
+    model.physics('DilutedSpecies').feature('init1').setIndex('initc', sprintf('%s_interp(x,y)',m.c_id{i}), i-1);
+%     model.physics('DilutedSpecies').feature('init2').setIndex('initc', sprintf('%s_interp_ddl(lambdaD+y,x)',m.c_id{i}), i-1);
 
     
     model.physics('DilutedSpecies').feature('SurfaceFlux').setIndex('species', true, i-1);
-    model.physics('DilutedSpecies').feature('SurfaceFlux').setIndex('N0', sprintf('smoothenBpeBC(X/L)*%s', m.N_id{i}), i-1);
+    model.physics('DilutedSpecies').feature('SurfaceFlux').setIndex('N0', sprintf('smoothenBpeBC(x/L)*%s', m.N_id{i}), i-1);
  
 %     model.physics('DilutedSpecies').feature('BulkFlux').setIndex('species', true, i-1);
 %     model.physics('DilutedSpecies').feature('BulkFlux').setIndex('N0', sprintf('-smoothenBpeBC(X/L)*onSurface(%s)', m.N_id{i}), i-1);

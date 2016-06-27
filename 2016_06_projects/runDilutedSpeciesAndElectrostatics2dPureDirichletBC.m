@@ -7,7 +7,7 @@ if ~exist('caseStudyParameterFile','var')
     caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 end
 
-caseStudyTitle = 'dilutedSpeciesAndElectrostatics2d';
+caseStudyTitle = 'dilutedSpeciesAndElectrostatics2dPureDirichletBC';
 createEmptyProject;
 
 % or, to load an existing project from server or from file
@@ -49,7 +49,7 @@ model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('filename', f
 model.mesh('simpleDdlGeometryRefinedMeshPart').run;
 
 %%
-makeDilutedSpeciesAndElectrostatics2dComponent
+makeDilutedSpeciesAndElectrostatics2dComponentPureDirichletBC
 
 pname = {};
 plistarr = {};
@@ -89,22 +89,11 @@ storedSolutions = model.study(study_id).getSolverSequences('Stored');
 solInfo = mphsolinfo(model,'soltag',char(storedSolutions(1)));
 dset = char(solInfo.dataset);
 
-% % make parametric extrusion
-% model.result.dataset.create('par1', 'Parametric1D');
-% model.result.dataset('par1').set('data', dset);
-% % model.result.dataset('par1').setIndex('looplevelinput', 'manual', 2);
-% % model.result.dataset('par1').setIndex('looplevelinput', 'first', 1);
-% % model.result.dataset('par1').setIndex('looplevelinput', 'manual', 1);
-% model.result.dataset('par1').set('levelscaleactive', 'on');
-% model.result.dataset('par1').set('levelscale', '1');
-% model.result.dataset('par1').set('innerinput', 'all');
-% model.result.dataset('par1').run;
-
 m.saveState;
 
 createPlots
 
-%% 1d plots
+%%
 % set up expressions to plot
 % small letters: dimensionles, capital letters: dimensional
 
@@ -193,60 +182,6 @@ plots('kappa')  = { {'kappa'},'kappa'};
 sweepHorizontalCrossection(m,dset,m.lambdaD/2,'XleftBoundary','XrightBoundary',-m.lambdaD,0,plots);
 sweepHorizontalCrossection(m,dset,m.L/4,'XleftBoundary','XrightBoundary',m.L/4,m.L,plots);
 
-%% 2d plots
-plots = containers.Map;
-% plots(title) = { {expression1, expression2, ...}, ylabel };
-plots('phi')    = { 'phi/UT', 'phi / U_T'};
-plots('gradPhi')   = { {'phix/UT*L','phiy/UT*L'}, 'grad phi * L / U_T'};
-% plots('phiy')   = { {'phiy/UT*L'}, 'phi_y * L / U_T'};
-plots('_PHI')   = { 'phi', 'phi / V' };
-plots('_PHIx')  = { {'phix','phiy'}, 'grad phi / V m^{-1}'};
-% plots('_PHIy')  = { {'phiy'}, 'phi_y / V m^{-1}'};
-
-for i=1:m.numberOfSpecies
-    plots(m.c_id{i})= { C{i}, 'c / c_ref' };
-    plots(sprintf('log%s',m.c_id{i}))   = { logC{i}, 'log(c/c_ref)'};
-    plots(sprintf('abs%s',m.c_id{i}))   = { absC{i},'|grad(c)| * L / c_ref'}; 
-    plots(sprintf('grad%s',m.cx_id{i}))     = { {Cx{i},Cy{i}},'grad c * L / c_ref'};
-%     plots(m.cy_id)     = { Cy, 'c_y * L / c_ref'};
-    plots(sprintf('_%s',m.C_id{i}))     = { m.c_id{i}, 'c / mol m^{-3}'};
-    plots(sprintf('_log%s',m.C_id{i}))  = { logc{i} , 'log(c/mol m^{-3})'};
-    plots(sprintf('_abs%s',m.C_id{i}))  = { absc{i}, '|grad c| / mol m^{-4}'};
-    plots(sprintf('_grad%s',m.C_id{i}))    = { {cx{i},cy{i}},  'grad c / mol m^{-4}'};
-%     plots(sprintf('_%sy',m.C_id))    = { cy{i}, 'c_y / mol m^{-4}'};
-
-    plots(sprintf('abs%s',m.N_dimless_id{i}))   = { absn{i}, '|n|'};
-    plots(sprintf('grad%s',m.N_dimless_id{i}))     = { {m.nx_id{i},m.ny_id{i}},'grad n'};
-%     plots(m.ny_id)     = { m.ny_id,'ny'};
-    plots(sprintf('_abs%s',m.N_id{i}))   = { absN{i}, '|N|'};
-    plots(sprintf('_grad%s',m.N_id{i}))  = { {m.Nx_id{i},m.Ny_id{i}},'grad N'};
-%     plots('Ny')     = { m.Ny_id,'Ny'};
-
-    plots(sprintf('absDiffusiveFlux_%s',m.speciesNames{i})) = { absDiffusiveFlux{i}, '-D*|grad c|' };
-    plots(sprintf('diffusiveFlux_%s',m.speciesNames{i})) = { {diffusiveFluxX{i},diffusiveFluxY{i}}, '-D*grad c' };
-%     plots('diffusiveFluxY') = { diffusiveFluxY, '-D*cy' };
-
-    plots(sprintf('absElectrophoreticFlux_%s',m.speciesNames{i})) = { absElectrophoreticFlux{i}, '|-z*u*c*F*grad phi|' };
-    plots(sprintf('electrophoreticFlux_%s',m.speciesNames{i})) = { {electrophoreticFluxX{i},electrophoreticFluxY{i}}, '-z*u*c*F*grad phi' };
-%     plots('electrophoreticFluxY') = { electrophoreticFluxY, '-z*u*c*F*phiy' };
-
-    plots(sprintf('absTotalFlux_%s',m.speciesNames{i})) = { absTotalFlux{i}, '|-D*grad c - z*u*c*F*grad phi|' };
-    plots(sprintf('totalFluxX_%s',m.speciesNames{i})) = { { totalFluxX{i},totalFluxY{i} }, '-D*grad x - z*u*c*F*grad phi' };
-%     plots('totalFluxY') = { totalFluxY, '-z*u*c*F*phiy' };
-end
-
-plots('absi')   = { 'sqrt(ix^2+iy^2)','|i|'};
-plots('gradi')     = { {'ix','iy'},'grad i'};
-% plots('iy')     = { {'iy'},'iy'};
-plots('absI')   = { 'sqrt(Ix^2+iy^2)','|I|'};
-plots('_gradI')     = { {'Ix','Iy'},'grad I'};
-% plots('Iy')     = { {'Iy'},'Iy'};
-% plots('absI')   = { {'tcdee.IlMag'},'|I|'};
-% plots('Ix')     = { {'tcdee.Ilx'},'Ix'};
-% plots('Iy')     = { {'tcdee.Ily'},'Iy'};
-plots('kappa')  = { 'kappa','kappa'};
-
-plotStandard2d(m,dset,plots);
 
 %% surface plots, global
 plots = containers.Map;
@@ -306,20 +241,20 @@ end
 
 plotGlobal1d(m,dset,'X',plots);
 %% export
-model.result.export.create('exportDilutedSpeciesAndElectrostatics1dData', 'Data');
-model.result.export('exportDilutedSpeciesAndElectrostatics1dData').set('data', 'par1');
-model.result.export('exportDilutedSpeciesAndElectrostatics1dData').setIndex('expr', 'phi', 0);
+model.result.export.create('exportDilutedSpeciesAndElectrostatics2dData', 'Data');
+model.result.export('exportDilutedSpeciesAndElectrostatics2dData').set('data', 'dset2');
+model.result.export('exportDilutedSpeciesAndElectrostatics2dData').setIndex('expr', 'phi', 0);
 for i=1:m.numberOfSpecies
-    model.result.export('exportDilutedSpeciesAndElectrostatics1dData').setIndex('expr', m.c_id{i}, i);
+    model.result.export('exportDilutedSpeciesAndElectrostatics2dData').setIndex('expr', m.c_id{i}, i);
 end
 
-files('exportDilutedSpeciesAndElectrostatics1dDataFile') = [pwd,'\',m.projectPath,'\exportDilutedSpeciesAndElectrostatics1dDataFile.txt'];
+files('exportDilutedSpeciesAndElectrostatics2dDataFile') = [pwd,'\',m.projectPath,'\exportDilutedSpeciesAndElectrostatics2dDataFile.txt'];
 
-model.result.export('exportDilutedSpeciesAndElectrostatics1dData').set('location', 'fromdataset');
+model.result.export('exportDilutedSpeciesAndElectrostatics2dData').set('location', 'fromdataset');
 % model.result.export('exportDilutedSpeciesAndElectrostatics1dData').set('gridx2', 'range( XleftBoundary, W/1000, XrightBoundary)');
 % model.result.export('exportDilutedSpeciesAndElectrostatics1dData').set('gridy2', '0');
-model.result.export('exportDilutedSpeciesAndElectrostatics1dData').set('filename', files('exportDilutedSpeciesAndElectrostatics1dDataFile'));
-model.result.export('exportDilutedSpeciesAndElectrostatics1dData').run;
+model.result.export('exportDilutedSpeciesAndElectrostatics2dData').set('filename', files('exportDilutedSpeciesAndElectrostatics2dDataFile'));
+model.result.export('exportDilutedSpeciesAndElectrostatics2dData').run;
 
 jlh.hf.saveMapAsTxt(files,'globalFiles.txt');
 return

@@ -57,6 +57,8 @@ makeTertiaryCurrentDistribution2dComponent
 makeSimpleStudy
 % tags of created features in sol_id, study_id, studyStep_id, compile_id,
 % variables_id, solver_id and store_id
+model.sol('sol1').feature('s1').feature('dDef').set('ooc', 'on');
+
 
 model.sol(sol_id).run(store_id);
 
@@ -122,9 +124,9 @@ plots('_Cy')    = { cy, 'c_y / mol m^{-4}'};
 plots('absn')   = { absn, '|n|'};
 plots('nx')     = { m.nx_id,'nx'};
 plots('ny')     = { m.ny_id,'ny'};
-plots('absN')   = { absN, '|N|'};
-plots('Nx')     = { m.Nx_id,'Nx'};
-plots('Ny')     = { m.Ny_id,'Ny'};
+plots('_absN')   = { absN, '|N|'};
+plots('_Nx')     = { m.Nx_id,'Nx'};
+plots('_Ny')     = { m.Ny_id,'Ny'};
 
 plots('absDiffusiveFlux') = { absDiffusiveFlux, '-D*|grad c|' };
 plots('diffusiveFluxX') = { diffusiveFluxX, '-D*cx' };
@@ -136,7 +138,7 @@ plots('electrophoreticFluxY') = { electrophoreticFluxY, '-z*u*c*F*phiy' };
 
 plots('absTotalFlux') = { absTotalFlux, '|-D*grad c - z*u*c*F*grad phi|' };
 plots('totalFluxX') = { totalFluxX, '-D*cx - z*u*c*F*phix' };
-plots('totalFluxY') = { totalFluxY, '-z*u*c*F*phiy' };
+plots('totalFluxY') = { totalFluxY, '-D*cy - z*u*c*F*phiy' };
 
 
 plots('absi')   = { {'sqrt(ix^2+iy^2)'},'|i|'};
@@ -145,14 +147,69 @@ plots('iy')     = { {'iy'},'iy'};
 % plots('absI')   = { {'sqrt(Ix^2+iy^2)'},'|I|'};
 % plots('Ix')     = { {'Ix'},'Ix'};
 % plots('Iy')     = { {'Iy'},'Iy'};
-plots('absI')   = { {'tcdee.IlMag'},'|I|'};
-plots('Ix')     = { {'tcdee.Ilx'},'Ix'};
-plots('Iy')     = { {'tcdee.Ily'},'Iy'};
+plots('_absI')   = { {'tcdee.IlMag'},'|I|'};
+plots('_Ix')     = { {'tcdee.Ilx'},'Ix'};
+plots('_Iy')     = { {'tcdee.Ily'},'Iy'};
 
 plots('kappa')  = { {'kappa'},'kappa'};
 
 sweepHorizontalCrossection(m,dset,m.L/4,'XleftBoundary','XrightBoundary',0,m.L,plots);
 % m.sweepVerticalCrossection(dset,m.W/4);
+
+%% 2d plots
+plots = containers.Map;
+% plots(title) = { {expression1, expression2, ...}, ylabel };
+plots('phi')    = { 'phi/UT', 'phi / U_T'};
+plots('gradPhi')   = { {'phix/UT*L','phiy/UT*L'}, 'grad phi * L / U_T'};
+% plots('phiy')   = { {'phiy/UT*L'}, 'phi_y * L / U_T'};
+plots('_PHI')   = { 'phi', 'phi / V' };
+plots('_PHIx')  = { {'phix','phiy'}, 'grad phi / V m^{-1}'};
+% plots('_PHIy')  = { {'phiy'}, 'phi_y / V m^{-1}'};
+
+for i=1:m.numberOfSpecies
+    plots(m.c_id{i})= { C{i}, 'c / c_ref' };
+    plots(sprintf('log%s',m.c_id{i}))   = { logC{i}, 'log(c/c_ref)'};
+    plots(sprintf('abs%s',m.c_id{i}))   = { absC{i},'|grad(c)| * L / c_ref'}; 
+    plots(sprintf('grad%s',m.cx_id{i}))     = { {Cx{i},Cy{i}},'grad c * L / c_ref'};
+%     plots(m.cy_id)     = { Cy, 'c_y * L / c_ref'};
+    plots(sprintf('_%s',m.C_id{i}))     = { m.c_id{i}, 'c / mol m^{-3}'};
+    plots(sprintf('_log%s',m.C_id{i}))  = { logc{i} , 'log(c/mol m^{-3})'};
+    plots(sprintf('_abs%s',m.C_id{i}))  = { absc{i}, '|grad c| / mol m^{-4}'};
+    plots(sprintf('_grad%s',m.C_id{i}))    = { {cx{i},cy{i}},  'grad c / mol m^{-4}'};
+%     plots(sprintf('_%sy',m.C_id))    = { cy{i}, 'c_y / mol m^{-4}'};
+
+    plots(sprintf('abs%s',m.N_dimless_id{i}))   = { absn{i}, '|n|'};
+    plots(sprintf('grad%s',m.N_dimless_id{i}))     = { {m.nx_id{i},m.ny_id{i}},'grad n'};
+%     plots(m.ny_id)     = { m.ny_id,'ny'};
+    plots(sprintf('_abs%s',m.N_id{i}))   = { absN{i}, '|N|'};
+    plots(sprintf('_grad%s',m.N_id{i}))  = { {m.Nx_id{i},m.Ny_id{i}},'grad N'};
+%     plots('Ny')     = { m.Ny_id,'Ny'};
+
+    plots(sprintf('absDiffusiveFlux_%s',m.speciesNames{i})) = { absDiffusiveFlux{i}, '-D*|grad c|' };
+    plots(sprintf('diffusiveFlux_%s',m.speciesNames{i})) = { {diffusiveFluxX{i},diffusiveFluxY{i}}, '-D*grad c' };
+%     plots('diffusiveFluxY') = { diffusiveFluxY, '-D*cy' };
+
+    plots(sprintf('absElectrophoreticFlux_%s',m.speciesNames{i})) = { absElectrophoreticFlux{i}, '|-z*u*c*F*grad phi|' };
+    plots(sprintf('electrophoreticFlux_%s',m.speciesNames{i})) = { {electrophoreticFluxX{i},electrophoreticFluxY{i}}, '-z*u*c*F*grad phi' };
+%     plots('electrophoreticFluxY') = { electrophoreticFluxY, '-z*u*c*F*phiy' };
+
+    plots(sprintf('absTotalFlux_%s',m.speciesNames{i})) = { absTotalFlux{i}, '|-D*grad c - z*u*c*F*grad phi|' };
+    plots(sprintf('totalFluxX_%s',m.speciesNames{i})) = { { totalFluxX{i},totalFluxY{i} }, '-D*grad x - z*u*c*F*grad phi' };
+%     plots('totalFluxY') = { totalFluxY, '-z*u*c*F*phiy' };
+end
+
+plots('absi')   = { 'sqrt(ix^2+iy^2)','|i|'};
+plots('gradi')     = { {'ix','iy'},'grad i'};
+% plots('iy')     = { {'iy'},'iy'};
+plots('absI')   = { 'sqrt(Ix^2+iy^2)','|I|'};
+plots('_gradI')     = { {'Ix','Iy'},'grad I'};
+% plots('Iy')     = { {'Iy'},'Iy'};
+% plots('absI')   = { {'tcdee.IlMag'},'|I|'};
+% plots('Ix')     = { {'tcdee.Ilx'},'Ix'};
+% plots('Iy')     = { {'tcdee.Ily'},'Iy'};
+plots('kappa')  = { 'kappa','kappa'};
+
+plotStandard2d(m,dset,plots);
 
 %% export
 model.result.export.create('exportTertiaryCurrentDistributionData', 'Data');

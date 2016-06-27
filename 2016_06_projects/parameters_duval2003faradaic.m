@@ -45,14 +45,14 @@ zNO3m = -1;
 
 
 % switches
-m.bpePoissonEquationBC = 'Robin'; % apply Stern layer Robin BC
-m.explicitElectrodeGeometry = false;
+% m.bpePoissonEquationBC = 'Robin'; % apply Stern layer Robin BC
+% m.explicitElectrodeGeometry = false;
 %bpePoissonEquationBC = 'Dirichlet'; % apply fixed potential at bpe
 
-m.bpeFluxOn = false; % switch species flux due to reactions on or off'
+% m.bpeFluxOn = false; % switch species flux due to reactions on or off'
 
-m.widthToHeight = 5/3; % width : height relation for single plots
-m.plotsVisible = 'on'; % 'off' stores plots, but does not show them as pop ups
+% m.widthToHeight = 5/3; % width : height relation for single plots
+% m.plotsVisible = 'on'; % 'off' stores plots, but does not show them as pop ups
 
 
 % environment and physical constants
@@ -69,19 +69,24 @@ m.D       = [DH3Op,DOHm,DKp,DNO3m]; % diffusivity of solute species
 m.epsilon     = 0.01; % relation Debye length : simulation domain, lambdaD / L
 m.delta       = 0.1; % relation width of Stern layer : Debye length, lambdaS / lambdaD
 
-Wbpe  = 0.5e-3/100; % 500mu m
-Wgap  = 0.5e-3/100; %0.5mm / 10000
+% Wbpe  = 0.5e-3/100; % 500mu m
+% Wgap  = 0.5e-3/100; %0.5mm / 10000
 
-m.wMeshRatio = 10; % desired ratio between w_mesh and l (l=1)   
-m.elementSizeAtSurface = m.epsilon/10;
+Wbpe  = 76e-3; % 76 mm
+Wgap  = 1e-3; % arbitrary value of 1mm
+H  = 0.1e-3; % 0.1mm, using cell symmetry
+
+% m.wMeshRatio = 10; % desired ratio between w_mesh and l (l=1)   
+% m.elementSizeAtSurface = m.epsilon/10;
 
 m.Wbpe = Wbpe;
-m.WinsulatorLeft = 0;
-m.WinsulatorRight = 0;
-m.Wcathode = 0;
-m.Wanode = 0;
+% m.WinsulatorLeft = 0;
+% m.WinsulatorRight = 0;
+% m.Wcathode = 0;
+% m.Wanode = 0;
 m.WbulkLeft = Wgap;
 m.WbulkRight = Wgap;
+m.H = H;
 
 % potentials
 E_m = [0.095,0.021,-0.133,-0.286];
@@ -89,7 +94,7 @@ E_m = [0.095,0.021,-0.133,-0.286];
 m.PHI_bpe     = E_m(c); % [phi] = V
 m.PHI_bulk    = 0;
 
-m.deltaPHI = 7.5/100;
+m.deltaPHI = 1; % arbitrary, 1 V
 m.phiSymmetryFactor = 0.5;
 
 %% reactions
@@ -145,3 +150,6 @@ m.reactions{i}.n                          = 2; % as in Krawiec
 m.reactions{i}.flux                       = [0,2,0,0]; % inward flux of OHm with cathodic current 
 
 m.nReactions = i;
+
+%% simulation settings
+smootheningFactor = 100;

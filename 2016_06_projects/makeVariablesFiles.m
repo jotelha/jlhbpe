@@ -267,6 +267,8 @@ writeParameterTextFile(weVariables,files('weVariablesTertiaryCurrentDistribution
 writeParameterTextFile(ceVariables,files('ceVariablesTertiaryCurrentDistribution2d'));
 
 %% Diluted Species and Electrostatics, 2d
+surfaceVariables('V') = {'phi_s-extrudeZetaPlaneToSurface(phi)', 'Metal - reaction plane potential difference, with dimension'};
+
 files('domainVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\domainVariablesDilutedSpeciesAndElectrostatics2d.txt'];
 files('surfaceVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\surfaceVariablesDilutedSpeciesAndElectrostatics2d.txt'];
 files('weVariablesDilutedSpeciesAndElectrostatics2d') = [pwd,'\',m.projectPath,'\weVariablesDilutedSpeciesAndElectrostatics2d.txt'];
