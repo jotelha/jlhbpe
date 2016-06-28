@@ -178,13 +178,13 @@ plots = containers.Map;
 
 c = prepTerm('intSurface(c_id)','c_id',m.c_id);
 logc = prepTerm('intSurface(log(c_id))','c_id',m.c_id);
-cx = prepTerm('intSurface(tds.grad_c_idx)','c_id',m.c_id);
+cx = prepTerm('intSurface(c_idx)','c_id',m.c_id);
 C = prepTerm('intSurface(c_id/c_ref)','c_id',m.c_id);
 logC = prepTerm('intSurface(log(c_id/c_ref))','c_id',m.c_id);
-Cx = prepTerm('intSurface((tds.grad_c_idx/c_ref*L))','c_id',m.c_id);
-diffusiveFluxX = prepTerm('intSurface(tds.dflux_c_idx)','c_id',m.c_id);
-electrophoreticFluxX = prepTerm('intSurface(tds.mflux_c_idx)','c_id',m.c_id);
-totalFluxX = prepTerm('intSurface(tds.tflux_c_idx)','c_id',m.c_id);
+Cx = prepTerm('intSurface(c_idx/c_ref*L)','c_id',m.c_id);
+diffusiveFluxX = prepTerm('intSurface(diffusiveFluxX)','diffusiveFluxX',diffusiveFluxX);
+electrophoreticFluxX = prepTerm('intSurface(electrophoreticFluxX)','electrophoreticFluxX',electrophoreticFluxX);
+totalFluxX = prepTerm('intSurface(totalFluxX)','totalFluxX',totalFluxX);
 nx = prepTerm('intSurface(nx_id)','nx_id',m.nx_id);
 Nx = prepTerm('intSurface(Nx_id)','Nx_id',m.Nx_id);
 
