@@ -35,6 +35,7 @@ model.param().loadFile(files('parameterFile'));
 % mesh parts
 
 model.modelNode.create('mcomp1', 'MeshComponent');
+
 model.geom.create('mgeom1', 2); % mesh geometry
 model.mesh.create('simpleBulkGeometryRefinedMeshPart', 'mgeom1');
 model.mesh('simpleBulkGeometryRefinedMeshPart').create('imp1', 'Import');
@@ -52,6 +53,9 @@ model.mesh('simpleBulkGeometryRefinedMeshPart').run;
 % model.mesh('simpleDdlGeometryRefinedMeshPart').run;
 
 %%
+% meshFile = 'tertiaryCurrentDistributionMesh_copy.m'; %% standard method of meshing, copy mesh from geometry file
+meshFile = 'tertiaryCurrentDistributionMesh_simple.m'; %% tells following script to run this file for meshing
+
 makeTertiaryCurrentDistribution2dComponent
 
 makeSimpleStudy
@@ -156,6 +160,29 @@ plots('kappa')  = { {'kappa'},'kappa'};
 sweepHorizontalCrossection(m,dset,m.L/4,'XleftBoundary','XrightBoundary',0,m.L,plots);
 % m.sweepVerticalCrossection(dset,m.W/4);
 
+%% surface plots, additional 
+plots('i_total')    = { {'i_total'}, 'I / A m^-2'};
+plots('i_cathodic')   = { {'i_cathodic'}, 'I / A m^-2'};
+plots('i_anodic')   = { {'i_anodic'}, 'I / A m^-2' };
+plots('log_i_cathodic')   = { {'log(abs(i_cathodic))'}, 'I / A m^-2'};
+plots('log_i_anodic')   = { {'log(abs(i_anodic))'}, 'I / A m^-2' };
+plots('log_i_cathodic')   = { {'log(abs(i_cathodic))'}, 'I / A m^-2'};
+plots('log_i')   = { {'log(abs(i_anodic))','log(abs(i_cathodic))'}, 'I / A m^-2' };
+for i = 1:m.nReactions
+        plots(m.i_id{i}) = { m.i_id(i),  'I / A m^-2'};
+end
+for i = 1:m.numberOfSpecies
+    plots(m.N_id{i}) = {  m.N_id(i),  'mol / s m^-2'};
+    plots(m.Ny_id{i})= { m.Ny_id(i), 'mol / s m^-2'};
+end
+
+for i = 1:m.numberOfSpecies
+    plots([m.N_id{i},'_comparative']) = { { m.N_id{i} ,m.Ny_id{i} },  'mol / s m^-2'};
+end
+
+% plotGlobal1d(m,dset,'X',plots);
+plotBoundarySelection(m,dset,'tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bpeSurface','x',plots);
+
 %% 2d plots
 plots = containers.Map;
 % plots(title) = { {expression1, expression2, ...}, ylabel };
@@ -210,6 +237,24 @@ plots('_gradI')     = { {'Ix','Iy'},'grad I'};
 plots('kappa')  = { 'kappa','kappa'};
 
 plotStandard2d(m,dset,plots);
+
+%% numerical evaluations
+titles = {'PHI_bpe', 'Ix_WE', 'Ix_CE', 'Iy_BPE', ' I_total', 'I_anodic', 'I_cathodic', 'I_faradaic', 'I_ohmic'};
+expressions = { 'PHI_bpe', ... % mixed potential
+                'intWE(tcdee.Ilx)', ...
+                'intCE(tcdee.Ilx)', ...
+                'intBPE(tcdee.Ily)', ...
+                'intBPE(i_total)',...
+                'intBPE(i_anodic)',...
+                'intBPE(i_cathodic)', ...
+                '(intBPE(i_anodic)-intBPE(i_cathodic))/2', ... % faradaic current, averaged
+                '(intWE(tcdee.Ilx)+intCE(tcdee.Ilx))/2 - (intBPE(i_anodic)-intBPE(i_cathodic))/2' }; % ohmic current, averaged
+globalEvaluations = cell(1,numel(expressions));
+[globalEvaluations{:}] = mphglobal(model, expressions, 'dataset', dset);
+geTable = table(globalEvaluations{:},'VariableNames',titles);
+
+globalEvaluationsFile = [pwd,'\',m.projectPath,'\globalEvaluations.txt'];
+writetable(geTable,globalEvaluationsFile,'WriteRowNames',false,'WriteVariableNames',true,'Delimiter',' ');
 
 %% export
 model.result.export.create('exportTertiaryCurrentDistributionData', 'Data');

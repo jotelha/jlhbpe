@@ -20,13 +20,13 @@ ionicStrengthSummand = prepTerm('z_id^2*c_bulk_id','z_id','c_bulk_id',m.z_id,m.c
 ionicStrengthTerm = strcat('1/2*(', strjoin( ionicStrengthSummand','+' ), ')');
 debyeLengthTerm = 'sqrt(epsilon0_const*epsilon_r*RT/(2*F_const^2*IonicStrength))';
 
-wePotentialTerm       = 'phiSymmetryFactor*deltaPhi';
-cePotentialTerm       = '-(1-phiSymmetryFactor)*deltaPhi';
+wePotentialTerm       = 'phiSymmetryFactor*DeltaPHI';
+cePotentialTerm       = '-(1-phiSymmetryFactor)*DeltaPHI';
 
 %     wePotentialTerm       = 'phi_bpe+phiSymmetryFactor*deltaPhi';
 %     cePotentialTerm       = 'phi_bpe-(1-phiSymmetryFactor)*deltaPhi';
 %     
-deltaPhiTerm          = sprintf('deltaPhiRampFactor*%e',m.delta_phi);
+deltaPhiTerm          = sprintf('deltaPhiRampFactor*%e',m.deltaPHI);
 
 % robin bc in comsol are of form
 %   -n*(-c grad u - alpha u + gamma) = g - q*u
@@ -108,12 +108,12 @@ parameters('kappa_bulk') = {kappaTerm, 'ionic conductivity in bulk solution'}; %
 parameters('C_Stern') = {C_Stern, 'Stern layer capacitance, dimensionless'}; % Stern layer capacitance
 
 % m.param.set('phi_bpe',attachUnit(phi_bpe,'V'),'potential at surface of bpe');
-parameters('phi_bpe_init') = {m.phi_bpe,'dimensionless potential at surface of bpe'};
-parameters('deltaPhi') = {deltaPhiTerm,'potential difference between working electrode and counter electrode'};
+% parameters('phi_bpe_init') = {m.phi_bpe,'dimensionless potential at surface of bpe'};
+parameters('deltaPhi') = 'DeltaPHI/UT'; %{deltaPhiTerm,'potential difference between working electrode and counter electrode'};
 parameters('phiSymmetryFactor') = {m.phiSymmetryFactor,'symmetry of applied potential around bpe potential'};
 
-parameters('phi_we') = {wePotentialTerm,'dimensionless potential at working electrode'};
-parameters('phi_ce') = {cePotentialTerm,'dimensionless potential at counter electrode'};
+parameters('phi_we') = {'PHI_we/UT','dimensionless potential at working electrode'};
+parameters('phi_ce') = {'PHI_ce/UT','dimensionless potential at counter electrode'};
 
 parameters('phi_bulk') = {'0','bulk electrolyte as reference'};
 parameters('phi_ref') = {'0','reference potential'};
@@ -135,10 +135,10 @@ parameters('Wbpe') = {'w_bpe*L', 'Width of BPE'};
 parameters('XleftBoundary') = '(-w_bpe/2-w_bulkLeft)*L';
 parameters('XrightBoundary') = '(w_bpe/2+w_bulkRight)*L';
 
-parameters('DeltaPHI') = 'deltaPhi*UT';
+parameters('DeltaPHI') = {deltaPhiTerm,'potential difference between working electrode and counter electrode'}; % 'deltaPhi*UT';
 parameters('PHI_bpe') = {['surfacePotentialRampFactor*',attachUnit(m.PHI_bpe,'V')],'potential at surface of bpe'};
-parameters('PHI_we') = 'phi_we*UT';
-parameters('PHI_ce') = 'phi_ce*UT';
+parameters('PHI_we') = {wePotentialTerm,'dimensional potential at working electrode'}; %'phi_we*UT';
+parameters('PHI_ce') = {cePotentialTerm,'dimensional potential at counter electrode'}; %'phi_ce*UT';
 parameters('C_Stern_dimensional') = {C_Stern_dimensional, 'Stern layer capacitance'}; % Stern layer capacitance  
 
 parameters('T') = {attachUnit(m.T,'K'), 'Temperature'}; % move to parameter settings

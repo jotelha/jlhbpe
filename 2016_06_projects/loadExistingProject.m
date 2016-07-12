@@ -29,6 +29,7 @@ else
     fprintf('Model %s does not exist on server, loaded from file %s...',m.model_tag,mphFile);
     m.m = mphload(mphFile,m.model_tag);
 end
+model = m.m;
 %% run logger
 % also necessary to execute when loading
 

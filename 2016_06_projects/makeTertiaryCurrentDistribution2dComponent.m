@@ -4,15 +4,20 @@
 % m.comp_id = 'tertiaryCurrentDistributionComponent';
 model.modelNode.create('tertiaryCurrentDistributionComponent'); 
 model.geom.create('tertiaryCurrentDistributionGeometry',2);
-model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleBulkGeometry');
+model.geom('tertiaryCurrentDistributionGeometry').insertFile(files('geometryPartsMphFile'), 'simpleBulkGeometry');
 
-model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
-model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
+% model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
+% model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
 
 % model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleAssembledGeometry');
 
 % functions
 model.func.create('smoothenBpeBC', 'Rectangle');
+
+% operators
+model.cpl.create('intWE', 'Integration', 'tertiaryCurrentDistributionGeometry');
+model.cpl.create('intCE', 'Integration', 'tertiaryCurrentDistributionGeometry');
+model.cpl.create('intBPE', 'Integration', 'tertiaryCurrentDistributionGeometry');
 
 % variables
 model.variable.create('domainVariables');
@@ -33,18 +38,31 @@ end
 %% update
 
 % mesh
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').geom(2);
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').geom(2);
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').all;
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_space_dom');
-model.mesh('tertiaryCurrentDistributionMesh').run('copy1');
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').geom(2);
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').geom(2);
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').all;
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_space_dom');
+% model.mesh('tertiaryCurrentDistributionMesh').run('copy1');
+run(meshFile);
 
 % functions 
 model.func('smoothenBpeBC').set('upper', 'w_bpe/2');
 model.func('smoothenBpeBC').set('smooth', 'epsilon*smootheningFactor');
 model.func('smoothenBpeBC').set('funcname', 'smoothenBpeBC');
 model.func('smoothenBpeBC').set('lower', '-w_bpe/2');
+
+% operators
+model.cpl('intWE').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_workingElectrode');
+model.cpl('intCE').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_counterElectrode');
+model.cpl('intBPE').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bpeSurface');
+
+model.cpl('intWE').label('intWE');
+model.cpl('intWE').set('opname', 'intWE');
+model.cpl('intCE').label('intCE');
+model.cpl('intCE').set('opname', 'intCE');
+model.cpl('intBPE').label('intBPE');
+model.cpl('intBPE').set('opname', 'intBPE');
 
 % variables
 model.variable('domainVariables').model('tertiaryCurrentDistributionComponent');
@@ -90,7 +108,8 @@ model.physics('TertiaryCurrentDistribution').feature('init1').set('initphis', 'P
 % bc selection
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bpeSurface');
 model.physics('TertiaryCurrentDistribution').feature('ElectrodePotential').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_electrodes');
-model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bulkBoundary');
+% model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bulkBoundary');
+model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_electrodes');
 
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').set('phisext0', 'PHI_bpe'); % bpe
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').feature('er1').active(false); % deactivate standard reaction

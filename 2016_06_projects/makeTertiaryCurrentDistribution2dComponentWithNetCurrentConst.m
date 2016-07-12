@@ -4,15 +4,16 @@
 % m.comp_id = 'tertiaryCurrentDistributionComponent';
 model.modelNode.create('tertiaryCurrentDistributionComponent'); 
 model.geom.create('tertiaryCurrentDistributionGeometry',2);
-model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleBulkGeometry');
+model.geom('tertiaryCurrentDistributionGeometry').insertFile(files('geometryPartsMphFile'), 'simpleBulkGeometry');
 
-model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
-model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
+%model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
+%model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
 
 % model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleAssembledGeometry');
 
 % functions
 model.func.create('smoothenBpeBC', 'Rectangle');
+model.func.create('interpolateStoredValues2d','Interpolation');
 
 % operators
 model.cpl.create('intWE', 'Integration', 'tertiaryCurrentDistributionGeometry');
@@ -36,23 +37,38 @@ for i=1:m.nReactions
 end
 
 model.physics.create('ge', 'GlobalEquations', 'tertiaryCurrentDistributionGeometry');
-
-
+model.physics('ge').feature.create('gconstr1', 'GlobalConstraint', -1);
 %% update
 
 % mesh
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').geom(2);
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').geom(2);
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').all;
-model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_space_dom');
-model.mesh('tertiaryCurrentDistributionMesh').run('copy1');
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').geom(2);
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').geom(2);
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').all;
+% model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_space_dom');
+% model.mesh('tertiaryCurrentDistributionMesh').run('copy1');
+run(meshFile);
 
 % functions 
 model.func('smoothenBpeBC').set('upper', 'w_bpe/2');
 model.func('smoothenBpeBC').set('smooth', 'epsilon*smootheningFactor');
 model.func('smoothenBpeBC').set('funcname', 'smoothenBpeBC');
 model.func('smoothenBpeBC').set('lower', '-w_bpe/2');
+
+% interpolate previous bulk results
+model.func('interpolateStoredValues2d').set('source', 'file');
+model.func('interpolateStoredValues2d').set('interp', 'linear');
+
+model.func('interpolateStoredValues2d').setIndex('funcs', 'phi_interp_bulk', 0, 0);
+model.func('interpolateStoredValues2d').setIndex('funcs', num2str(1), 0, 1);
+
+for i=1:m.numberOfSpecies
+    model.func('interpolateStoredValues2d').setIndex('funcs', sprintf('%s_interp_bulk',m.c_id{i}), i, 0);
+    model.func('interpolateStoredValues2d').setIndex('funcs', num2str(i+1), i, 1);
+end
+model.func('interpolateStoredValues2d').set('filename', files('exportTertiaryCurrentDistribution2dDataFile'));
+model.func('interpolateStoredValues2d').set('nargs', '2');
+model.func('interpolateStoredValues2d').importData;
 
 % operators
 model.cpl('intWE').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_workingElectrode');
@@ -104,18 +120,18 @@ model.physics('TertiaryCurrentDistribution').prop('SpeciesProperties').set('From
 model.physics('TertiaryCurrentDistribution').feature('ice1').set('minput_temperature', 'T');
 
 % potential initial values
-model.physics('TertiaryCurrentDistribution').feature('init1').set('initphil', 'phi0');
+model.physics('TertiaryCurrentDistribution').feature('init1').set('initphil', 'phi_interp_bulk(x,y)');
 model.physics('TertiaryCurrentDistribution').feature('init1').set('initphis', 'PHI_bpe'); % redundant
 
 % bc selection
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bpeSurface');
 model.physics('TertiaryCurrentDistribution').feature('ElectrodePotential').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_electrodes');
-model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bulkBoundary');
+% model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bulkBoundary');
+model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_electrodes');
 
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').set('phisext0', 'PHI_bpe'); % bpe
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').feature('er1').active(false); % deactivate standard reaction
 model.physics('TertiaryCurrentDistribution').feature('ElectrodePotential').set('philbnd', 'phi_s'); % feeder electrodes
-
 
 for i = 1:m.numberOfSpecies
     D_c_id = sprintf('D_%s',m.c_id{i});
@@ -128,7 +144,7 @@ for i = 1:m.numberOfSpecies
     if i<m.numberOfSpecies
         model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').setIndex('species', true, i-1);
         model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').setIndex('c0', m.c_bulk_id{i}, i-1);
-        model.physics('TertiaryCurrentDistribution').feature('init1').setIndex('initc', m.c_0_id{i}, i-1);
+        model.physics('TertiaryCurrentDistribution').feature('init1').setIndex('initc', sprintf('%s_interp_bulk(x,y)',m.c_id{i}), i-1);
     end
 end
     
@@ -147,3 +163,6 @@ model.physics('ge').feature('ge1').set('name', 'PHI_bpe');
 model.physics('ge').feature('ge1').set('equation', 'intBPE(tcdee.Ily)');
 model.physics('ge').feature('ge1').set('initialValueU', m.PHI_bpe);
 model.physics('ge').feature('ge1').set('valueType', 'real');
+
+% constraint for stabilization: entering current must equal exiting current
+model.physics('ge').feature('gconstr1').set('constraintExpression', 'intWE(tcdee.Ily)-intCE(tcdee.Ily)');

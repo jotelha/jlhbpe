@@ -36,3 +36,5 @@ dat/
 # comsol lock files
 *.lock
 
+# temporary office files
+~$*

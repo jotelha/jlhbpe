@@ -1,5 +1,5 @@
 % caseStudyTitle = 'duval2003faradaic';
-c = 4;
+% c = 4;
 
 % concentrations
 m.speciesNames = {'H3Op','OHm','Kp','NO3m'};

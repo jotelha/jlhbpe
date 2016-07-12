@@ -7,7 +7,8 @@ if ~exist('caseStudyParameterFile','var')
     caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 end
 
-caseStudyTitle = 'tertiaryCurrentdDistribution2dWithNetCurrentConstraint';
+% caseStudyTitle = 'tertiaryCurrentdDistribution2dWithNetCurrentConstraint';
+caseStudyTitle = 'tcd2dZNC'; % zero net current
 createEmptyProject;
 
 % or, to load an existing project from server or from file
@@ -52,7 +53,9 @@ model.mesh('simpleBulkGeometryRefinedMeshPart').run;
 % model.mesh('simpleDdlGeometryRefinedMeshPart').run;
 
 %%
-makeTertiaryCurrentDistribution2dComponentWithNetCurrentConstraint
+meshFile = 'tertiaryCurrentDistributionMesh_simple.m';
+
+makeTertiaryCurrentDistribution2dComponentWithNetCurrentConst
 
 makeSimpleStudy
 % tags of created features in sol_id, study_id, studyStep_id, compile_id,
@@ -70,7 +73,7 @@ m.saveState;
 
 createPlots
 
-%%
+%% 1d plots
 % set up expressions to plot
 % small letters: dimensionles, capital letters: dimensional
 
@@ -156,6 +159,30 @@ plots('kappa')  = { {'kappa'},'kappa'};
 sweepHorizontalCrossection(m,dset,m.L/4,'XleftBoundary','XrightBoundary',0,m.L,plots);
 % m.sweepVerticalCrossection(dset,m.W/4);
 
+%% surface plots, additional 
+plots('i_total')    = { {'i_total'}, 'I / A m^-2'};
+plots('i_cathodic')   = { {'i_cathodic'}, 'I / A m^-2'};
+plots('i_anodic')   = { {'i_anodic'}, 'I / A m^-2' };
+plots('log_i_cathodic')   = { {'log(abs(i_cathodic))'}, 'I / A m^-2'};
+plots('log_i_anodic')   = { {'log(abs(i_anodic))'}, 'I / A m^-2' };
+plots('log_i_cathodic')   = { {'log(abs(i_cathodic))'}, 'I / A m^-2'};
+plots('log_i')   = { {'log(abs(i_anodic))','log(abs(i_cathodic))'}, 'I / A m^-2' };
+for i = 1:m.nReactions
+        plots(m.i_id{i}) = { m.i_id(i),  'I / A m^-2'};
+end
+for i = 1:m.numberOfSpecies
+    plots(m.N_id{i}) = {  m.N_id(i),  'mol / s m^-2'};
+    plots(m.Ny_id{i})= { m.Ny_id(i), 'mol / s m^-2'};
+end
+
+for i = 1:m.numberOfSpecies
+    plots([m.N_id{i},'_comparative']) = { { m.N_id{i} ,m.Ny_id{i} },  'mol / s m^-2'};
+end
+
+% plotGlobal1d(m,dset,'X',plots);
+plotBoundarySelection(m,dset,'tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_bpeSurface','x',plots);
+
+
 %% 2d plots
 plots = containers.Map;
 % plots(title) = { {expression1, expression2, ...}, ylabel };
@@ -212,23 +239,22 @@ plots('kappa')  = { 'kappa','kappa'};
 plotStandard2d(m,dset,plots);
 
 %% numerical evaluations
-% model.result.numerical.create('gev1', 'EvalGlobal');
-% model.result.numerical.create('gev2', 'EvalGlobal');
-% model.result.numerical.create('gev3', 'EvalGlobal');
-% model.result.numerical.create('gev4', 'EvalGlobal');
-% model.result.numerical.create('gev5', 'EvalGlobal');
-% model.result.numerical.create('gev6', 'EvalGlobal');
-% model.result.numerical.create('gev7', 'EvalGlobal');
-% model.result.numerical.create('gev8', 'EvalGlobal');
+titles = {'PHI_bpe', 'Ix_WE', 'Ix_CE', 'Iy_BPE', ' I_total', 'I_anodic', 'I_cathodic', 'I_faradaic', 'I_ohmic'};
 expressions = { 'PHI_bpe', ... % mixed potential
                 'intWE(tcdee.Ilx)', ...
                 'intCE(tcdee.Ilx)', ...
                 'intBPE(tcdee.Ily)', ...
-                'intBPE(ii_anodic)',...
-                'intBPE(ii_cathodic)', ...
-                '(intBPE(ii_anodic)-intBPE(ii_cathodic))/2', ... % faradaic current, averaged
-                '(intWE(tcdee.Ilx)+intCE(tcdee.Ilx))/2 - (intBPE(ii_anodic)-intBPE(ii_cathodic))/2' }; % ohmic current, averaged
-mphglobal(model, expressions, 'dataset', dset);
+                'intBPE(i_total)',...
+                'intBPE(i_anodic)',...
+                'intBPE(i_cathodic)', ...
+                '(intBPE(i_anodic)-intBPE(i_cathodic))/2', ... % faradaic current, averaged
+                '(intWE(tcdee.Ilx)+intCE(tcdee.Ilx))/2 - (intBPE(i_anodic)-intBPE(i_cathodic))/2' }; % ohmic current, averaged
+globalEvaluations = cell(1,numel(expressions));
+[globalEvaluations{:}] = mphglobal(model, expressions, 'dataset', dset);
+geTable = table(globalEvaluations{:},'VariableNames',titles);
+
+globalEvaluationsFile = [pwd,'\',m.projectPath,'\globalEvaluations.txt'];
+writetable(geTable,globalEvaluationsFile,'WriteRowNames',false,'WriteVariableNames',true,'Delimiter',' ');
 
 %% export
 model.result.export.create('exportTertiaryCurrentDistributionData', 'Data');
@@ -238,19 +264,19 @@ for i=1:m.numberOfSpecies
     model.result.export('exportTertiaryCurrentDistributionData').setIndex('expr', m.c_id{i}, i);
 end
 
-files('exportTertiaryCurrentDistributionDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistributionDataFile.txt'];
+files('exportTertiaryCurrentDistributionWithNetCurrentConstraintDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistributionWithNetCurrentConstraintDataFile.txt'];
 
 model.result.export('exportTertiaryCurrentDistributionData').set('location', 'grid');
 model.result.export('exportTertiaryCurrentDistributionData').set('gridx2', 'range( XleftBoundary, W/1000, XrightBoundary)');
 model.result.export('exportTertiaryCurrentDistributionData').set('gridy2', '0');
-model.result.export('exportTertiaryCurrentDistributionData').set('filename', files('exportTertiaryCurrentDistributionDataFile'));
+model.result.export('exportTertiaryCurrentDistributionData').set('filename', files('exportTertiaryCurrentDistributionWithNetCurrentConstraintDataFile'));
 model.result.export('exportTertiaryCurrentDistributionData').run;
 
 % full
-files('exportTertiaryCurrentDistribution2dDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistribution2dDataFile.txt'];
+files('exportTertiaryCurrentDistributionWithNetCurrentConstraint2dDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistributionWithNetCurrentConstraint2dDataFile.txt'];
 
 model.result.export('exportTertiaryCurrentDistributionData').set('location', 'fromdataset');
-model.result.export('exportTertiaryCurrentDistributionData').set('filename', files('exportTertiaryCurrentDistribution2dDataFile'));
+model.result.export('exportTertiaryCurrentDistributionData').set('filename', files('exportTertiaryCurrentDistributionWithNetCurrentConstraint2dDataFile'));
 model.result.export('exportTertiaryCurrentDistributionData').run;
 
 jlh.hf.saveMapAsTxt(files,'globalFiles.txt');
