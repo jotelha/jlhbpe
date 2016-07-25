@@ -7,7 +7,7 @@ if ~exist('caseStudyParameterFile','var')
     caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 end
 
-caseStudyTitle = 'tertiaryCurrentdDistribution2d';
+caseStudyTitle = 'tcd2dZNC';
 createEmptyProject;
 
 % or, to load an existing project from server or from file
@@ -19,12 +19,15 @@ createEmptyProject;
 % makeVariablesFiles
 
 if ~exist('BatchDir','var')
+%     BatchDir = [ pwd, '\', m.projectPath, '\batch'];
     BatchDir = 'batch';
 end
 if ~exist('ParametricDir','var')
+%     BatchDir = [ pwd, '\', m.projectPath, '\batch'];
     ParametricDir = 'parametric';
 end
 if ~exist('OutputDir','var')
+%     BatchDir = [ pwd, '\', m.projectPath, '\batch'];
     OutputDir = 'output';
 end
  
@@ -80,19 +83,21 @@ model.param().loadFile(files('parameterFile'));
 % model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleDdlGeometryRefinedMeshFile'));
 % model.mesh('simpleDdlGeometryRefinedMeshPart').run;
 
-%% makeTertiaryCurrentDistribution2dComponent
+%% makeTertiaryCurrentDistribution2dComponentWithNetCurrentConst
+
 % component for rough tertiary current approximation
 model.modelNode.create('tertiaryCurrentDistributionComponent'); 
 model.geom.create('tertiaryCurrentDistributionGeometry',2);
 model.geom('tertiaryCurrentDistributionGeometry').insertFile(files('geometryPartsMphFile'), 'simpleBulkGeometry');
 
-% model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
-% model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
+%model.mesh.create('tertiaryCurrentDistributionMesh', 'tertiaryCurrentDistributionGeometry');
+%model.mesh('tertiaryCurrentDistributionMesh').create('copy1', 'Copy');
 
 % model.geom('tertiaryCurrentDistributionGeometry').insertFile(geometryPartsMphFile, 'simpleAssembledGeometry');
 
 % functions
 model.func.create('smoothenBpeBC', 'Rectangle');
+model.func.create('interpolateStoredValues2d','Interpolation');
 
 % operators
 model.cpl.create('intWE', 'Integration', 'tertiaryCurrentDistributionGeometry');
@@ -115,6 +120,8 @@ for i=1:m.nReactions
     model.physics('TertiaryCurrentDistribution').feature('BpeSurface').feature.create(m.reactionNames{i}, 'ElectrodeReaction', 1);
 end
 
+model.physics.create('ge', 'GlobalEquations', 'tertiaryCurrentDistributionGeometry');
+model.physics('ge').feature.create('gconstr1', 'GlobalConstraint', -1);
 %% update
 
 % mesh
@@ -124,12 +131,29 @@ end
 % model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('source').all;
 % model.mesh('tertiaryCurrentDistributionMesh').feature('copy1').selection('destination').named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_space_dom');
 % model.mesh('tertiaryCurrentDistributionMesh').run('copy1');
-
 % functions 
+
 model.func('smoothenBpeBC').set('upper', 'w_bpe/2');
 model.func('smoothenBpeBC').set('smooth', 'epsilon*smootheningFactor');
 model.func('smoothenBpeBC').set('funcname', 'smoothenBpeBC');
 model.func('smoothenBpeBC').set('lower', '-w_bpe/2');
+
+% interpolate previous bulk results
+model.func('interpolateStoredValues2d').set('source', 'file');
+model.func('interpolateStoredValues2d').set('interp', 'linear');
+
+model.func('interpolateStoredValues2d').setIndex('funcs', 'phi_interp_bulk', 0, 0);
+model.func('interpolateStoredValues2d').setIndex('funcs', num2str(1), 0, 1);
+
+for i=1:m.numberOfSpecies
+    model.func('interpolateStoredValues2d').setIndex('funcs', sprintf('%s_interp_bulk',m.c_id{i}), i, 0);
+    model.func('interpolateStoredValues2d').setIndex('funcs', num2str(i+1), i, 1);
+end
+% leave this for each individual parametric loop, done by class
+% UpadateInitialValues.class
+% model.func('interpolateStoredValues2d').set('filename', files('exportTertiaryCurrentDistribution2dDataFile'));
+% model.func('interpolateStoredValues2d').set('nargs', '2');
+% model.func('interpolateStoredValues2d').importData;
 
 % operators
 model.cpl('intWE').selection.named('tertiaryCurrentDistributionGeometry_simpleBulkGeometryPartInstance1_workingElectrode');
@@ -181,7 +205,7 @@ model.physics('TertiaryCurrentDistribution').prop('SpeciesProperties').set('From
 model.physics('TertiaryCurrentDistribution').feature('ice1').set('minput_temperature', 'T');
 
 % potential initial values
-model.physics('TertiaryCurrentDistribution').feature('init1').set('initphil', 'phi0');
+model.physics('TertiaryCurrentDistribution').feature('init1').set('initphil', 'phi_interp_bulk(x,y)');
 model.physics('TertiaryCurrentDistribution').feature('init1').set('initphis', 'PHI_bpe'); % redundant
 
 % bc selection
@@ -194,7 +218,6 @@ model.physics('TertiaryCurrentDistribution').feature('BpeSurface').set('phisext0
 model.physics('TertiaryCurrentDistribution').feature('BpeSurface').feature('er1').active(false); % deactivate standard reaction
 model.physics('TertiaryCurrentDistribution').feature('ElectrodePotential').set('philbnd', 'phi_s'); % feeder electrodes
 
-
 for i = 1:m.numberOfSpecies
     D_c_id = sprintf('D_%s',m.c_id{i});
     % isotropic diffusivity
@@ -206,7 +229,7 @@ for i = 1:m.numberOfSpecies
     if i<m.numberOfSpecies
         model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').setIndex('species', true, i-1);
         model.physics('TertiaryCurrentDistribution').feature('BulkConcentration').setIndex('c0', m.c_bulk_id{i}, i-1);
-        model.physics('TertiaryCurrentDistribution').feature('init1').setIndex('initc', m.c_0_id{i}, i-1);
+        model.physics('TertiaryCurrentDistribution').feature('init1').setIndex('initc', sprintf('%s_interp_bulk(x,y)',m.c_id{i}), i-1);
     end
 end
     
@@ -220,12 +243,21 @@ for i=1:m.nReactions
     end
 end
 
+% zero net current on bpe surface equation:
+model.physics('ge').feature('ge1').set('name', 'PHI_bpe');
+model.physics('ge').feature('ge1').set('equation', 'intBPE(tcdee.Ily)');
+model.physics('ge').feature('ge1').set('initialValueU', m.PHI_bpe);
+model.physics('ge').feature('ge1').set('valueType', 'real');
+
+% constraint for stabilization: entering current must equal exiting current
+model.physics('ge').feature('gconstr1').set('constraintExpression', 'intWE(tcdee.Ily)-intCE(tcdee.Ily)');
+
 % makeBatchStudy
 % tags of created features in sol_id, study_id, studyStep_id, compile_id,
 % variables_id, solver_id and store_id
 % model.sol('sol1').feature('s1').feature('dDef').set('ooc', 'on');
 
-% %% meshing
+%% meshing
 % if( ~exist('meshFile','var' ) )
 %     meshFile = 'copySimpleBulkGeometryMeshCoarse_case_a.m'; %% standard method of meshing, copy mesh from geometry file
 % end
@@ -296,6 +328,7 @@ model.sol(sol_id).create(store_id, 'StoreSolution');
 model.study(study_id).create(paramStep_id,'Parametric');
 model.batch.create(param_id,'Parametric');
 
+model.batch(param_id).create('cl1','Class'); % exterior java class to call for adaption before solving
 model.batch(param_id).create('so1', 'Solutionseq');
 model.batch(param_id).create('saDef', 'Save');
 % model.batch(param_id).create('en1', 'Evalnumericalseq');
@@ -318,6 +351,8 @@ model.batch(param_id).set('keeplog', true);
 model.batch(param_id).set('plistarr', plistarr);
 model.batch(param_id).set('pname', pname);
 model.batch(param_id).set('control', paramStep_id);
+model.batch('p1').feature('cl1').set('filename', 'UpdateInitialValues.class');
+model.batch('p1').feature('cl1').set('input', {'sweep' 'input\inputFiles.txt' 'input' 'interpolateStoredValues2d'});
 model.batch(param_id).feature('so1').set('seq', sol_id);
 model.batch('p1').feature('nu1').set('table', 'tbl1');
 
@@ -366,16 +401,13 @@ model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermconst', 'itertol');
 model.sol(sol_id).feature(solver_id).feature('fcDef').set('niter', '15');
 model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermauto', 'itertol');
-
 %% numerical evaluations
 % model.result.table('tbl1').comments('Global Evaluation 1 (intWE(tcdee.Ilx))');
 model.result.export.create('tbl1', 'Table');
 model.result.export('tbl1').set('filename', GlobalEvaluationsTableFileName);
 
-
 titles = {'DeltaPHI','PHI_bpe', 'Ix_WE', 'Ix_CE', 'Iy_BPE', ' I_total', 'I_anodic', 'I_cathodic', 'I_faradaic', 'I_ohmic'};
 expressions = { 'DeltaPHI', ...
-                'PHI_bpe', ... % mixed potential
                 'intWE(tcdee.Ilx)', ...
                 'intCE(tcdee.Ilx)', ...
                 'intBPE(tcdee.Ily)', ...
@@ -393,28 +425,54 @@ for i=1:numel(expressions)
     model.result.numerical(titles{i}).set('descr', expressions{i});
 end
 
-
-
 %% export
 model.result.export.create('exportTertiaryCurrentDistributionData', 'Data');
+% model.result.export('exportTertiaryCurrentDistributionData').set('data', dset);
 model.result.export('exportTertiaryCurrentDistributionData').setIndex('expr', 'phi', 0);
 for i=1:m.numberOfSpecies
     model.result.export('exportTertiaryCurrentDistributionData').setIndex('expr', m.c_id{i}, i);
 end
 
+% files('exportTertiaryCurrentDistributionDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistributionDataFile.txt'];
 model.result.export('exportTertiaryCurrentDistributionData').set('location', 'grid');
 model.result.export('exportTertiaryCurrentDistributionData').set('gridx2', 'range( XleftBoundary, W/1000, XrightBoundary)');
 model.result.export('exportTertiaryCurrentDistributionData').set('gridy2', '0');
 model.result.export('exportTertiaryCurrentDistributionData').set('filename', exportTertiaryCurrentDistributionDataFile);
+% model.result.export('exportTertiaryCurrentDistributionData').run;
 
 % full
 model.result.export.create('exportTertiaryCurrentDistribution2dData', 'Data');
+% model.result.export('exportTertiaryCurrentDistributionData').set('data', dset);
+% model.result.export('exportTertiaryCurrentDistribution2dData').setIndex('expr', 'phi', 0);
+% for i=1:m.numberOfSpecies
+%     model.result.export('exportTertiaryCurrentDistribution2dData').setIndex('expr', m.c_id{i}, i);
+% end
+% 
+% % files('exportTertiaryCurrentDistribution2dDataFile') = [pwd,'\',m.projectPath,'\exportTertiaryCurrentDistribution2dDataFile.txt'];
+% 
+% model.result.export('exportTertiaryCurrentDistribution2dData').set('location', 'fromdataset');
+% model.result.export('exportTertiaryCurrentDistribution2dData').set('filename', exportTertiaryCurrentDistribution2dDataFile);
+% % model.result.export('exportTertiaryCurrentDistributionData').run;
+% model.result.export('exportTertiaryCurrentDistributionData').set('location', 'fromdataset');
+gridx = 10000;
+% W = mphevaluate(model,'W');
+% H = mphevaluate(model,'H');
+% %     gridx = round(W/H*4);
+% gridy = round(gridx*H/W);
+gridy = round(gridx*m.H/m.W);
+
+% model.result.export('exportTertiaryCurrentDistribution2dData').set('data', dset);
 model.result.export('exportTertiaryCurrentDistribution2dData').setIndex('expr', 'phi', 0);
 for i=1:m.numberOfSpecies
     model.result.export('exportTertiaryCurrentDistribution2dData').setIndex('expr', m.c_id{i}, i);
 end
 
-model.result.export('exportTertiaryCurrentDistribution2dData').set('location', 'fromdataset');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('location', 'regulargrid');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('resolution', 'finer');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('sort', 'on');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('regulargridx2', gridx);
+model.result.export('exportTertiaryCurrentDistribution2dData').set('regulargridy2', gridy);
 model.result.export('exportTertiaryCurrentDistribution2dData').set('filename', exportTertiaryCurrentDistribution2dDataFile);
+model.result.export('exportTertiaryCurrentDistribution2dData').run;
 
 m.saveState;

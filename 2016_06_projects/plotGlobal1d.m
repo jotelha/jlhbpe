@@ -18,11 +18,12 @@ function plotGlobal1d(obj,dset,par,plots,plotDset)
     fullProjectPath = [pwd(),'\',obj.projectPath];
 
     % subfolder for dataset:
-    solution1dSubFolder = [fullProjectPath,'\solution1d'];
-    if( ~exist( solution1dSubFolder,'dir') )
-        mkdir(solution1dSubFolder);
-    end
-    dsetSubFolder = [solution1dSubFolder,'\',plotDset];
+%     solution1dSubFolder = [fullProjectPath,'\solution1d'];
+%     if( ~exist( solution1dSubFolder,'dir') )
+%         mkdir(solution1dSubFolder);
+%     end
+%     dsetSubFolder = [solution1dSubFolder,'\',plotDset];
+    dsetSubFolder = [fullProjectPath,'\',plotDset];
     if( ~exist( dsetSubFolder,'dir') )
         mkdir(dsetSubFolder);
     end
@@ -31,12 +32,21 @@ function plotGlobal1d(obj,dset,par,plots,plotDset)
         mkdir(globalSubFolder);
     end
                    
-    info = mphsolinfo(obj.m,'Dataset',dset,'NU','on');
-    nParameters = size(info.solpar,1);
-    nRuns = info.sizesolvals / nParameters;
+%     info = mphsolinfo(obj.m,'Dataset',dset,'NU','on');
+%     nParameters = size(info.solpar,1);
+%     nRuns = info.sizesolvals / nParameters;
+%     
+%     parameterNames = info.solpar; % with or without ' ?
+%     parameterValues = reshape(info.solvals,nParameters,nRuns)';
+
+    info = mphsolutioninfo(obj.m,'dataset',dset);
+    sol_id = info.solutions{1};
     
-    parameterNames = info.solpar; % with or without ' ?
-    parameterValues = reshape(info.solvals,nParameters,nRuns)';
+    parameterNames = info.(sol_id).parameters;
+    nParameters = size(parameterNames,1);
+    
+    nRuns = size(info.(sol_id).map,1);
+    parameterValues = info.(sol_id).map(:,1:(end-2));
     
     plotParameterPosition = find( strcmp(parameterNames,par) );
     

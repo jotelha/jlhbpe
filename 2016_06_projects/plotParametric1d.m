@@ -1,4 +1,6 @@
-function plotParametric1d(obj,dset,dsetFolder,selections,plots)
+function plotParametric1d(obj,dset,dsetFolder,selections,plots,step)
+    import com.comsol.model.*
+    import com.comsol.model.util.*
     import jlh.*
     import jlh.hf.*
     
@@ -7,6 +9,9 @@ function plotParametric1d(obj,dset,dsetFolder,selections,plots)
     end
     if ~iscell(selections)
         selections = {selections};
+    end
+    if ~exist('step','var')
+        step = 1;
     end
     
     % extract plot info
@@ -20,12 +25,23 @@ function plotParametric1d(obj,dset,dsetFolder,selections,plots)
     expressions = values;
     
     %% get parameter info
-    info = mphsolinfo(obj.m,'Dataset',dset,'NU','on');
-    nParameters = size(info.solpar,1);
-    nRuns = info.sizesolvals / nParameters;
+%     info = mphsolinfo(obj.m,'Dataset',dset,'NU','on');
+%     nParameters = size(info.solpar,1);
+%     nRuns = info.sizesolvals / nParameters;
+
+%     parameterNames = {info.solpar};
+%     parameterValues = reshape(info.solvals,nParameters,nRuns)';
     
-    parameterNames = {info.solpar};
-    parameterValues = reshape(info.solvals,nParameters,nRuns)';
+    info = mphsolutioninfo(obj.m,'dataset',dset);
+    sol_id = info.solutions{1};
+    
+    parameterNames = info.(sol_id).parameters;
+    nParameters = size(parameterNames,1);
+    
+    nRuns = size(info.(sol_id).map,1);
+    parameterValues = info.(sol_id).map(:,1:(end-2));
+
+    
     
     %% setup exporter
     obj.m.result.export('plotExporter1d').set('plotgroup', 'multiPurpose1dPlotGroup');
@@ -41,12 +57,13 @@ function plotParametric1d(obj,dset,dsetFolder,selections,plots)
     nExpressions = numel(expressions);
     
  
-    solution1dSubFolder = [fullProjectPath,'\solution1d'];
-    if( ~exist( solution1dSubFolder,'dir') )
-        mkdir(solution1dSubFolder);
-    end
+%     solution1dSubFolder = [fullProjectPath,'\solution1d'];
+%     if( ~exist( solution1dSubFolder,'dir') )
+%         mkdir(solution1dSubFolder);
+%     end
         
-    dsetSubFolder = [solution1dSubFolder,'\',dsetFolder];
+%     dsetSubFolder = [solution1dSubFolder,'\',dsetFolder];
+    dsetSubFolder = [fullProjectPath,'\',dsetFolder];
     if( ~exist( dsetSubFolder,'dir') )
         mkdir(dsetSubFolder);
     end
@@ -89,11 +106,12 @@ function plotParametric1d(obj,dset,dsetFolder,selections,plots)
                 end
             end
             
-            for l = 1:nRuns
+            for l = 1:step:nRuns
                 parameterSuffix = '';
                 for j = 1:nParameters
                     parameterSuffix = ['_',parameterNames{j},'_',num2str(parameterValues(l,j)),parameterSuffix];
                 end
+                parameterSuffix = [ sprintf('_%04d',l), parameterSuffix ];
 %                 pathTemplate = strrep(plotgroupSubFolder,'\','\\');
 %                 fileNameTemplate = [pathTemplate,'\\%s_%s',parameterSuffix,'.png'];
                 fileNameTemplate = [strrep(expressionSubFolder,'\','\\'),'\\%s_%s',parameterSuffix,'.png'];

@@ -3,11 +3,22 @@
 % sweepParameterValues = {-0.01/m.UT};
 
 if ~exist('BatchDir','var')
-    BatchDir = [ pwd, '\', m.projectPath, '\batch'];
+%     BatchDir = [ pwd, '\', m.projectPath, '\batch'];
+    BatchDir = 'batch';
 end
+if ~exist('ParametricDir','var')
+    ParametricDir = 'parametric';
+end
+BatchDirAbsolute = [pwd(), '\', m.projectPath, '\' BatchDir];
+ParametricDirAbsolute = [pwd(), '\', m.projectPath, '\' ParametricDir];
 
-ParametricSolutionFileName = [BatchDir, '\', m.model_tag, '_parametric.mph']; % absolute path!
-BatchFileName = [m.model_tag, '_batch.mph']; % only file name, no path
+% ParametricSolutionFileName = [BatchDir, '\', m.model_tag, '_parametric.mph']; % absolute path!
+ParametricSolutionFileName = 'parametric.mph'; % absolute path!
+ParametricSolutionFileNameAbsolute = [ParametricDirAbsolute , '\', ParametricSolutionFileName]; % absolute path!
+
+% BatchFileName = [m.model_tag, '_batch.mph']; % only file name, no path
+BatchFileName = 'batch.mph'; % only file name, no path
+BatchSolutionFileNameAbsolute = [BatchDirAbsolute , '\', BatchFileName]; % absolute path!
 
 % pname = {'phi_bpe_init','phi_bpe','surfaceFluxRampFactor', 'deltaPhi'};
 % plistarr = cellstr( cellfun(@(c) num2str(c), sweepParameterValues,'UniformOutput',false));
@@ -57,11 +68,14 @@ model.sol(sol_id).create(store_id, 'StoreSolution');
 model.study(study_id).create(paramStep_id,'Parametric');
 model.batch.create(param_id,'Parametric');
 
+model.batch(param_id).create('cl1','Class'); % exterior java class to call for adaption before solving
 model.batch(param_id).create('so1', 'Solutionseq');
 model.batch(param_id).create('saDef', 'Save');
-model.batch(param_id).create('en1', 'Evalnumericalseq');
+% model.batch(param_id).create('en1', 'Evalnumericalseq');
+model.batch(param_id).create('nu1', 'Numericalseq');
 model.batch(param_id).create('ex1', 'Exportseq');
 model.batch(param_id).study(study_id);
+
 
 model.study(study_id).feature(paramStep_id).set('pname', pname);
 model.study(study_id).feature(paramStep_id).set('paramselect', 'off');
@@ -69,7 +83,7 @@ model.study(study_id).feature(paramStep_id).set('plistarr', plistarr);
 model.study(study_id).feature(paramStep_id).set('punit', {''});
 model.study(study_id).feature(paramStep_id).set('save', 'on'); % important for saving solutions in seperate files
 model.study(study_id).feature(paramStep_id).set('keepsol', 'last'); % important for saving solutions in seperate files
-model.study(study_id).feature(paramStep_id).set('filename', ParametricSolutionFileName);
+model.study(study_id).feature(paramStep_id).set('filename', [ParametricDir, '\', ParametricSolutionFileName]);
 
 model.batch(param_id).set('punit', {''});
 model.batch(param_id).set('err', true);
@@ -77,7 +91,11 @@ model.batch(param_id).set('keeplog', true);
 model.batch(param_id).set('plistarr', plistarr);
 model.batch(param_id).set('pname', pname);
 model.batch(param_id).set('control', paramStep_id);
+model.batch('p1').feature('cl1').set('filename', 'UpdateInitialValues.class');
+model.batch('p1').feature('cl1').set('input', {'sweep' '"testList.txt"' '".\input"' '"int1"'});
 model.batch(param_id).feature('so1').set('seq', sol_id);
+model.batch('p1').feature('nu1').set('table', 'tbl1');
+
 model.batch(param_id).attach(study_id);
 
 % batch
@@ -85,8 +103,10 @@ model.study(study_id).create(batchStep_id, 'Batch');
 model.batch.create(batch_id,'Batch');
 
 model.batch(batch_id).create('jo1', 'Jobseq');
+% model.batch(batch_id).feature('daDef').create('pr1', 'Process');
+
 % model.batch(batch_id).create('nu1', 'Numericalseq');
-model.batch(batch_id).create('ex1', 'Exportseq');
+% model.batch(batch_id).create('ex1', 'Exportseq');
 model.batch(batch_id).study(study_id);
 
 model.study(study_id).feature(batchStep_id).set('batchdir', BatchDir);
@@ -96,6 +116,12 @@ model.batch(batch_id).set('control', batchStep_id);
 model.batch(batch_id).set('batchfile', BatchFileName);
 model.batch(batch_id).set('batchdir', BatchDir);
 model.batch(batch_id).set('speccomsoldir', 'off');
+
+% model.batch('b1').feature('daDef').feature('pr1').set('clientfilename', 'batch\batch_test_study_batch.mph');
+% model.batch('b1').feature('daDef').feature('pr1').set('cmd', {'comsolbatch' '-study' 'std1' '-alivetime' '15' '-inputfile' 'batch_test.mph' '-outputfile' '".\batch\batch_test_study_batch.mph"' '-batchlog'  ...
+% '".\batch\batch_test_study_batch.mph.log"'});
+% model.batch('b1').feature('daDef').feature('pr1').set('filename', 'batch\batch_test_study_batch.mph');
+
 model.batch(batch_id).attach(study_id);
 
 % set scaling for variables

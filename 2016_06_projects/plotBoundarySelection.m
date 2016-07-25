@@ -19,11 +19,12 @@ function plotBoundarySelection(obj,dset,selection,xexp,plots,plotDset)
     fullProjectPath = [pwd(),'\',obj.projectPath];
 
     % subfolder for dataset:
-    solution1dSubFolder = [fullProjectPath,'\solution1d'];
-    if( ~exist( solution1dSubFolder,'dir') )
-        mkdir(solution1dSubFolder);
-    end
-    dsetSubFolder = [solution1dSubFolder,'\',plotDset];
+%     solution1dSubFolder = [fullProjectPath,'\solution1d'];
+%     if( ~exist( solution1dSubFolder,'dir') )
+%         mkdir(solution1dSubFolder);
+%     end
+%     dsetSubFolder = [solution1dSubFolder,'\',plotDset];
+    dsetSubFolder = [fullProjectPath,'\',plotDset];
     if( ~exist( dsetSubFolder,'dir') )
         mkdir(dsetSubFolder);
     end

@@ -170,7 +170,7 @@ plots('kappa')  = { {'kappa'},'kappa'};
 % sweepHorizontalCrossection(m,dset,m.W/4,'XleftBoundary','XrightBoundary',XleftBoundary,XrightBoundary,plots);
 % m.sweepVerticalCrossection(dset,m.W/4);
 
-plotParametric1d(m,dset,dset,'all',plots)
+plotParametric1d(m,dset,dset,'all',plots);
 
 
 %% surface plots, global
