@@ -24,7 +24,7 @@ classdef Constants
 		MolarVolumeH3Op				= 5.4*100^(-3); %[m^3/mol]
         
         DiffusivityH3Op             = 9.31e-9; % [m^2/s]
-        DiffusivityOHm              = 1e-0; 
+        DiffusivityOHm              = 1e-9; 
         % source: Krawiec, H.; Vignal, V. & Akid, R.: Numerical modelling of the electrochemical behaviour of 316L stainless steel based upon static and dynamic experimental microcapillary-based techniques. Electrochimica Acta, 53 , 5252-5259 (2008)
 
        	

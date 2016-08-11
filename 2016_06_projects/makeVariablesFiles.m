@@ -105,11 +105,17 @@ NyTerm = prepTerm('domflux.c_idy','c_id',m.c_id);
 ixSummand = prepTerm('z_id*nx_id','z_id','nx_id',m.z_id,m.nx_id);
 iySummand = prepTerm('z_id*ny_id','z_id','ny_id',m.z_id,m.ny_id);
 
-IxTerm = 'D_ref*c_ref*F_const/L*ix';
-IyTerm = 'D_ref*c_ref*F_const/L*iy';
-
 ixTerm = strcat(strjoin(ixSummand','+' ));
 iyTerm = strcat(strjoin(iySummand','+' ));
+
+IxSummand = prepTerm('F_const*z_id*Ny_id','z_id','Ny_id',m.z_id,m.Nx_id);
+IySummand = prepTerm('F_const*z_id*Ny_id','z_id','Ny_id',m.z_id,m.Ny_id);
+
+% IxTerm = 'D_ref*c_ref*F_const/L*ix';
+% IyTerm = 'D_ref*c_ref*F_const/L*iy';
+
+IxTerm = strcat(strjoin(IxSummand','+' ));
+IyTerm = strcat(strjoin(IySummand','+' ));
 
 % local ionic conductivity
 kappaSummand = prepTerm('z_id^2*c_id*D_id','z_id','c_id','D_id',m.z_id,m.c_id,m.D_id);

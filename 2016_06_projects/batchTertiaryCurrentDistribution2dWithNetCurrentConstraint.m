@@ -250,7 +250,7 @@ model.physics('ge').feature('ge1').set('initialValueU', m.PHI_bpe);
 model.physics('ge').feature('ge1').set('valueType', 'real');
 
 % constraint for stabilization: entering current must equal exiting current
-model.physics('ge').feature('gconstr1').set('constraintExpression', 'intWE(tcdee.Ily)-intCE(tcdee.Ily)');
+model.physics('ge').feature('gconstr1').set('constraintExpression', 'intWE(tcdee.Ilx)-intCE(tcdee.Ilx)');
 
 % makeBatchStudy
 % tags of created features in sol_id, study_id, studyStep_id, compile_id,
