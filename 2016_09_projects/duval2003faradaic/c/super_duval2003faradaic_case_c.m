@@ -1,6 +1,13 @@
-caseStudyParameterFile = 'parameters_zhang2015control.m';
+% caseStudyParameterFile = 'parameters_duval2001bipolar.m';
+% caseStudyTitleSuffix = '_duval2001bipolar';
 
-caseStudyTitleSuffix = '_zhang2015control';
+% meshing by hand
+
+caseStudyParameterFile = 'parameters_duval2003faradaic.m';
+
+c = 3;
+caseStudyTitleSuffix = '_duval2003faradaic_case_c';
+
 
 makeGeometryPartFileMacro
 
@@ -8,7 +15,7 @@ makeGeometryPartFileMacro
 % meshFile = 'copySimpleBulkGeometryRefinedMesh.m';
 
 pname = { 'sweep' 'DeltaPHI' };
-plistarr = { 'range(1,1,3)' '0.1563,0.3166,0.5641' };
+plistarr = { 'range(1,1,10)' 'range(0.2,0.2,2)' };
 
 batchTertiaryCurrentDistribution2d
 
@@ -17,9 +24,6 @@ batchTertiaryCurrentDistribution2dWithNetCurrentConstraint
 hMaxFactor = 0.001;
 batchPDE1dSweep
 
-batchDilutetSpeciesAndElectrostatics2dPureDirichlet
-
-batchDilutetSpeciesAndElectrostatics2d
 % runDilutedSpeciesAndElectrostatics1dSweep
 % runDilutedSpeciesAndElectrostatics2dPureDirichletBC
 % runDilutedSpeciesAndElectrostatics2d

@@ -17,7 +17,6 @@ function sweepHorizontalCrossection(obj,dset,stepSize,left,right,lower,upper,plo
     if isnumeric(right)
         right = num2str(right);
     end
-        
 
     obj.m.result.dataset('multiPurposeCutLine').set('data', dset);
     obj.m.result.dataset('multiPurposeCutLine').label('multiPurposeCutLine');

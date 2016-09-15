@@ -30,6 +30,12 @@ function obj = plotStandard2d(obj,dset,plots)
     for i=1:nExpressions
         if ~iscell(expressions{i}) || numel(expressions{i}) == 1          
             obj.m.result('surfacePlotGroup').set('data',dset);
+            try
+                display('Trying to assign scaled view to graph <<surfacePlotGroup>>.');
+                obj.m.result('surfacePlotGroup').set('view', 'scaledResultView2d');
+            catch
+                display('Failed.');
+            end
         %     obj.m.result('surfacePlotGroup').set('view', 'standardView');
             obj.m.result('surfacePlotGroup').feature('surfacePlot').set('descr', desc{i});
             obj.m.result('surfacePlotGroup').feature('surfacePlot').set('expr', expressions{i});
@@ -40,6 +46,12 @@ function obj = plotStandard2d(obj,dset,plots)
 
             obj.m.result('contourPlotGroup').set('data',dset);
         %     obj.m.result('contourPlotGroup').set('view', 'standardView');
+            try
+                display('Trying to assign scaled view to graph <<contourPlotGroup>>.');
+                obj.m.result('contourPlotGroup').set('view', 'scaledResultView2d');
+            catch
+                display('Failed.');
+            end
             obj.m.result('contourPlotGroup').feature('contourPlot').set('descr', desc{i});
             obj.m.result('contourPlotGroup').feature('contourPlot').set('expr', expressions{i});
             obj.m.result.export('plotExporter2d').set('plotgroup', 'contourPlotGroup');
@@ -49,6 +61,12 @@ function obj = plotStandard2d(obj,dset,plots)
 %             curExp = expressions{i};
             obj.m.result('streamlinePlotGroup').set('data',dset);
         %     obj.m.result('streamlinePlotGroup').set('view', 'standardView');
+            try
+                display('Trying to assign scaled view to graph <<streamlinePlotGroup>>.');
+                obj.m.result('streamlinePlotGroup').set('view', 'scaledResultView2d');
+            catch
+                display('Failed.');
+            end
             obj.m.result('streamlinePlotGroup').feature('streamlinePlot').set('descr', 'Gradient of phi');
             obj.m.result('streamlinePlotGroup').feature('streamlinePlot').set('posmethod', streamlinePosmeth);
             obj.m.result('streamlinePlotGroup').feature('streamlinePlot').set('udist', streamlineDist);
@@ -60,6 +78,12 @@ function obj = plotStandard2d(obj,dset,plots)
    
             obj.m.result('arrowSurfacePlotGroup').set('data',dset);
 %             obj.m.result('arrowSurfacePlotGroup').set('view', 'standardView');
+            try
+                display('Trying to assign scaled view to graph <<arrowSurfacePlotGroup>>.');
+                obj.m.result('arrowSurfacePlotGroup').set('view', 'scaledResultView2d');
+            catch
+                display('Failed.');
+            end
             obj.m.result('arrowSurfacePlotGroup').feature('arrowSurfacePlot').set('xnumber', '20');
             obj.m.result('arrowSurfacePlotGroup').feature('arrowSurfacePlot').set('ynumber', '5');
             obj.m.result('arrowSurfacePlotGroup').feature('arrowSurfacePlot').set('expr', expressions{i});
@@ -73,6 +97,12 @@ function obj = plotStandard2d(obj,dset,plots)
     
             obj.m.result('arrowLinePlotGroup').set('data',dset);
 %             obj.m.result('arrowLinePlotGroup').set('view', 'standardView');
+            try
+                display('Trying to assign scaled view to graph <<arrowLinePlotGroup>>.');
+                obj.m.result('arrowLinePlotGroup').set('view', 'scaledResultView2d');
+            catch
+                display('Failed.');
+            end
             obj.m.result('arrowLinePlotGroup').feature('arrowLinePlot').set('expr', expressions{i});
             obj.m.result('arrowLinePlotGroup').feature('arrowLinePlot').set('arrowlength', arrowLength);
             obj.m.result('arrowLinePlotGroup').feature('arrowLinePlot').set('scale', arrowScale);
