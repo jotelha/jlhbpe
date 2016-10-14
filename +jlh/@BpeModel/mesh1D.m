@@ -25,7 +25,7 @@ function obj = mesh1D(obj)
     % dimensionless, with correction for Stern layer:
     % (x*L+lambdaS)/lambdaD = x/epsilon+delta
 %     phi0 = obj.delta_phi;
-    phi0 = obj.phi_bpe;
+    phi0 = abs(obj.phi_bpe)+abs(obj.delta_phi);
 %     gamma = tanh( abs(z1) * phi0/4);
     oldDigits = digits(accuracy);
     gamma = tanh(vpa(phi0/4));

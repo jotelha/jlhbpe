@@ -601,8 +601,13 @@ model.geom('simpleDdlGeometryWithMeshingEntities').feature('centralBpeMeshContro
 model.geom('simpleDdlGeometryWithMeshingEntities').feature('centralBpeMeshControlEdges').label('centralBpeMeshControlEdges');
 model.geom('simpleDdlGeometryWithMeshingEntities').feature('centralBpeMeshControlEdges').set('input', {'boundariesAdjacentToEastwardMeshControlVertices' 'boundariesAdjacentToWestwardMeshControlVertices'});
 
-%% meshing
-m.hMaxFactor = 0.1;
+%% meshing'
+if exist('hMaxFactor','var')
+    m.hMaxFactor = hMaxFactor;
+else
+    m.hMaxFactor = 0.1;
+end
+
 m.mesh1D();
 
 a0 = m.intFirstDebyeLength(1);

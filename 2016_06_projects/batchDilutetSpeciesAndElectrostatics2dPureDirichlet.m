@@ -64,22 +64,22 @@ model = m.m;
 model.param().loadFile(files('parameterFile'));
 
 %% mesh components
-model.modelNode.create('mcomp1', 'MeshComponent');
-model.geom.create('mgeom1', 2); % mesh geometry
-model.mesh.create('simpleBulkGeometryRefinedMeshPart', 'mgeom1');
-model.mesh('simpleBulkGeometryRefinedMeshPart').create('imp1', 'Import');
-model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
-model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleBulkGeometryRefinedMeshFile'));
-model.mesh('simpleBulkGeometryRefinedMeshPart').run;
-% model.mesh('mpart1').feature('imp1').set('facepartition', 'auto');
-
-model.modelNode.create('mcomp2', 'MeshComponent');
-model.geom.create('mgeom2', 2); % mesh geometry
-model.mesh.create('simpleDdlGeometryRefinedMeshPart', 'mgeom2');
-model.mesh('simpleDdlGeometryRefinedMeshPart').create('imp1', 'Import');
-model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
-model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleDdlGeometryRefinedMeshFile'));
-model.mesh('simpleDdlGeometryRefinedMeshPart').run;
+% model.modelNode.create('mcomp1', 'MeshComponent');
+% model.geom.create('mgeom1', 2); % mesh geometry
+% model.mesh.create('simpleBulkGeometryRefinedMeshPart', 'mgeom1');
+% model.mesh('simpleBulkGeometryRefinedMeshPart').create('imp1', 'Import');
+% model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
+% model.mesh('simpleBulkGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleBulkGeometryRefinedMeshFile'));
+% model.mesh('simpleBulkGeometryRefinedMeshPart').run;
+% % model.mesh('mpart1').feature('imp1').set('facepartition', 'auto');
+% 
+% model.modelNode.create('mcomp2', 'MeshComponent');
+% model.geom.create('mgeom2', 2); % mesh geometry
+% model.mesh.create('simpleDdlGeometryRefinedMeshPart', 'mgeom2');
+% model.mesh('simpleDdlGeometryRefinedMeshPart').create('imp1', 'Import');
+% model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('source', 'native');
+% model.mesh('simpleDdlGeometryRefinedMeshPart').feature('imp1').set('filename', files('simpleDdlGeometryRefinedMeshFile'));
+% model.mesh('simpleDdlGeometryRefinedMeshPart').run;
 
 %% create
 % component for rough tertiary current approximation
@@ -122,9 +122,9 @@ model.geom('dilutedSpeciesAndElectrostatics2dGeometry').feature('bulkOuterBounda
 model.pair.create('p1', 'Identity', 'dilutedSpeciesAndElectrostatics2dGeometry');
 
 % mesh
-model.mesh.create('dilutedSpeciesAndElectrostatics2dMesh', 'dilutedSpeciesAndElectrostatics2dGeometry');
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').create('copy1', 'Copy');
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').create('copy2', 'Copy');
+% model.mesh.create('dilutedSpeciesAndElectrostatics2dMesh', 'dilutedSpeciesAndElectrostatics2dGeometry');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').create('copy1', 'Copy');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').create('copy2', 'Copy');
 
 % functions
 model.func.create('smoothenBpeBC', 'Rectangle');
@@ -142,6 +142,11 @@ model.func.create('interpolateStoredValues2d','Interpolation');
 
 %operators
 model.cpl.create('extrudeZetaPlaneToSurface', 'LinearExtrusion', 'dilutedSpeciesAndElectrostatics2dGeometry');
+
+% operators
+model.cpl.create('intWE', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
+model.cpl.create('intCE', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
+model.cpl.create('intBPE', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
 
 % model.cpl.create('onSurface', 'LinearExtrusion', 'dilutedSpeciesAndElectrostatics2dGeometry');
 % model.cpl.create('intSurface', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
@@ -196,19 +201,19 @@ model.pair('p1').source.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleD
 model.pair('p1').destination.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleBulkGeometryPartInstance1_entireSurface');
 
 % mesh
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('source').geom(2);
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('destination').geom(2);
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('source').all;
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('destination').named('dilutedSpeciesAndElectrostatics2dGeometry_simpleBulkGeometryPartInstance1_space_dom');
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').run('copy1');
-
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').set('mesh', 'simpleDdlGeometryRefinedMeshPart');
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('source').geom(2);
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('destination').geom(2);
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('source').all;
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('destination').named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
-model.mesh('dilutedSpeciesAndElectrostatics2dMesh').run('copy2');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').set('mesh', 'simpleBulkGeometryRefinedMeshPart');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('source').geom(2);
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('destination').geom(2);
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('source').all;
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy1').selection('destination').named('dilutedSpeciesAndElectrostatics2dGeometry_simpleBulkGeometryPartInstance1_space_dom');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').run('copy1');
+% 
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').set('mesh', 'simpleDdlGeometryRefinedMeshPart');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('source').geom(2);
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('destination').geom(2);
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('source').all;
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').feature('copy2').selection('destination').named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_ddl_dom');
+% model.mesh('dilutedSpeciesAndElectrostatics2dMesh').run('copy2');
 
 % functions 
 model.func('smoothenBpeBC').set('upper', 'w_bpe/2');
@@ -262,10 +267,10 @@ model.cpl('extrudeZetaPlaneToSurface').set('opname','extrudeZetaPlaneToSurface')
 % model.cpl('onSurface').selection('dstvertex1').geom('dilutedSpeciesAndElectrostatics1dGeometry', 0);
 model.cpl('extrudeZetaPlaneToSurface').selection.geom('dilutedSpeciesAndElectrostatics2dGeometry', 1);
 model.cpl('extrudeZetaPlaneToSurface').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_upperBoundary');
-model.cpl('extrudeZetaPlaneToSurface').selection('srcvertex1').set(2); % order of vertex creation important
-model.cpl('extrudeZetaPlaneToSurface').selection('srcvertex2').set(4);
-model.cpl('extrudeZetaPlaneToSurface').selection('dstvertex1').set(1);
-model.cpl('extrudeZetaPlaneToSurface').selection('dstvertex2').set(3);
+% model.cpl('extrudeZetaPlaneToSurface').selection('srcvertex1').set(2); % order of vertex creation important
+% model.cpl('extrudeZetaPlaneToSurface').selection('srcvertex2').set(4);
+% model.cpl('extrudeZetaPlaneToSurface').selection('dstvertex1').set(1);
+% model.cpl('extrudeZetaPlaneToSurface').selection('dstvertex2').set(3);
 % model.cpl('onSurface').set('opname','onSurface');
 % model.cpl('onSurface').selection.geom('dilutedSpeciesAndElectrostatics2dGeometry', 0);
 % model.cpl('onSurface').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simple1dGeometryPartInstance1_surfaceVertex');
@@ -279,6 +284,17 @@ model.cpl('extrudeZetaPlaneToSurface').selection('dstvertex2').set(3);
 % model.cpl('intBulk').selection.geom('dilutedSpeciesAndElectrostatics2dGeometry', 0);
 % model.cpl('intBulk').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simple1dGeometryPartInstance1_bulkVertex');
 % model.cpl('intBulk').set('opname', 'intBulk');
+
+model.cpl('intWE').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_workingElectrode');
+model.cpl('intCE').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_counterElectrode');
+model.cpl('intBPE').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_bpeSurface');
+
+model.cpl('intWE').label('intWE');
+model.cpl('intWE').set('opname', 'intWE');
+model.cpl('intCE').label('intCE');
+model.cpl('intCE').set('opname', 'intCE');
+model.cpl('intBPE').label('intBPE');
+model.cpl('intBPE').set('opname', 'intBPE');
 
 % variables
 model.variable('domainVariables').model('dilutedSpeciesAndElectrostatics2dComponent');

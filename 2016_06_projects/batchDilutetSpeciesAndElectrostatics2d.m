@@ -143,6 +143,10 @@ model.func.create('interpolateStoredValues2d','Interpolation');
 %operators
 model.cpl.create('extrudeZetaPlaneToSurface', 'LinearExtrusion', 'dilutedSpeciesAndElectrostatics2dGeometry');
 
+model.cpl.create('intWE', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
+model.cpl.create('intCE', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
+model.cpl.create('intBPE', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
+
 % model.cpl.create('onSurface', 'LinearExtrusion', 'dilutedSpeciesAndElectrostatics2dGeometry');
 % model.cpl.create('intSurface', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
 % model.cpl.create('intBulk', 'Integration', 'dilutedSpeciesAndElectrostatics2dGeometry');
@@ -283,6 +287,17 @@ model.cpl('extrudeZetaPlaneToSurface').selection.named('dilutedSpeciesAndElectro
 % model.cpl('intBulk').selection.geom('dilutedSpeciesAndElectrostatics2dGeometry', 0);
 % model.cpl('intBulk').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simple1dGeometryPartInstance1_bulkVertex');
 % model.cpl('intBulk').set('opname', 'intBulk');
+
+model.cpl('intWE').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_workingElectrode');
+model.cpl('intCE').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_counterElectrode');
+model.cpl('intBPE').selection.named('dilutedSpeciesAndElectrostatics2dGeometry_simpleDdlGeometryPartInstance1_bpeSurface');
+
+model.cpl('intWE').label('intWE');
+model.cpl('intWE').set('opname', 'intWE');
+model.cpl('intCE').label('intCE');
+model.cpl('intCE').set('opname', 'intCE');
+model.cpl('intBPE').label('intBPE');
+model.cpl('intBPE').set('opname', 'intBPE');
 
 % variables
 model.variable('domainVariables').model('dilutedSpeciesAndElectrostatics2dComponent');

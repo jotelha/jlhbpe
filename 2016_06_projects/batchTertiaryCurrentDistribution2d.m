@@ -7,7 +7,7 @@ if ~exist('caseStudyParameterFile','var')
     caseStudyParameterFile = 'parameters_duval2001bipolar.m';
 end
 
-caseStudyTitle = 'tertiaryCurrentdDistribution2d';
+caseStudyTitle = 'tcd2d';
 createEmptyProject;
 
 % or, to load an existing project from server or from file
@@ -360,7 +360,7 @@ model.sol(sol_id).feature(solver_id).set('nonlin', 'on');
 model.sol(sol_id).feature(solver_id).set('stol', '1e-3');
 
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'const');
-model.sol(sol_id).feature(solver_id).feature('dDef').set('ooc', 'on');
+model.sol(sol_id).feature(solver_id).feature('dDef').set('ooc', 'off'); % out of core
 model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermconst', 'itertol');
@@ -396,6 +396,7 @@ end
 
 
 %% export
+%% export
 model.result.export.create('exportTertiaryCurrentDistributionData', 'Data');
 model.result.export('exportTertiaryCurrentDistributionData').setIndex('expr', 'phi', 0);
 for i=1:m.numberOfSpecies
@@ -409,12 +410,21 @@ model.result.export('exportTertiaryCurrentDistributionData').set('filename', exp
 
 % full
 model.result.export.create('exportTertiaryCurrentDistribution2dData', 'Data');
+
+gridx = 1000;
+gridy = round(gridx*m.H/m.W);
+
 model.result.export('exportTertiaryCurrentDistribution2dData').setIndex('expr', 'phi', 0);
 for i=1:m.numberOfSpecies
     model.result.export('exportTertiaryCurrentDistribution2dData').setIndex('expr', m.c_id{i}, i);
 end
 
-model.result.export('exportTertiaryCurrentDistribution2dData').set('location', 'fromdataset');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('location', 'regulargrid');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('resolution', 'finer');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('sort', 'on');
+model.result.export('exportTertiaryCurrentDistribution2dData').set('regulargridx2', gridx);
+model.result.export('exportTertiaryCurrentDistribution2dData').set('regulargridy2', gridy);
 model.result.export('exportTertiaryCurrentDistribution2dData').set('filename', exportTertiaryCurrentDistribution2dDataFile);
+model.result.export('exportTertiaryCurrentDistribution2dData').run;
 
 m.saveState;

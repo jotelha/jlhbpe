@@ -395,7 +395,7 @@ model.sol(sol_id).feature(solver_id).set('nonlin', 'on');
 model.sol(sol_id).feature(solver_id).set('stol', '1e-3');
 
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'const');
-model.sol(sol_id).feature(solver_id).feature('dDef').set('ooc', 'on');
+model.sol(sol_id).feature(solver_id).feature('dDef').set('ooc', 'off');
 model.sol(sol_id).feature(solver_id).feature('fcDef').set('dtech', 'hnlin');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('termonres', 'on');
 % model.sol(sol_id).feature(solver_id).feature('fcDef').set('ntermconst', 'itertol');
@@ -454,7 +454,7 @@ model.result.export.create('exportTertiaryCurrentDistribution2dData', 'Data');
 % model.result.export('exportTertiaryCurrentDistribution2dData').set('filename', exportTertiaryCurrentDistribution2dDataFile);
 % % model.result.export('exportTertiaryCurrentDistributionData').run;
 % model.result.export('exportTertiaryCurrentDistributionData').set('location', 'fromdataset');
-gridx = 10000;
+gridx = 1000;
 % W = mphevaluate(model,'W');
 % H = mphevaluate(model,'H');
 % %     gridx = round(W/H*4);

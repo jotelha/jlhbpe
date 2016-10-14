@@ -75,8 +75,12 @@ totalCurrent = strjoin({anodicCurrent,cathodicCurrent},'');
 % i = n*F/RT*k0*( cOx * exp( - beta F/RT (E-E0) ) - cR exp( (1-beta) F/RT (E-E0) ) 
 % in anodic direction > 0:
 
-anodicTerms{emptyAnodicTerms} = '';
-cathodicTerms{emptyCathodicTerms} = '';
+if( emptyAnodicTerms ~= 0 )
+    anodicTerms{emptyAnodicTerms} = '';
+end
+if ( emptyCathodicTerms ~= 0 )
+    cathodicTerms{emptyCathodicTerms} = '';
+end
 reactionCurrent = prepTerm('AnodicCathodic','Anodic','Cathodic',anodicTerms',cathodicTerms');
   
 % dimensionless currents

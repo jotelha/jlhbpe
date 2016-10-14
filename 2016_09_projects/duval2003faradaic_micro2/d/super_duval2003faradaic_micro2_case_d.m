@@ -3,29 +3,28 @@
 
 % meshing by hand
 
-caseStudyParameterFile = 'parameters_duval2003faradaic_micro.m';
+caseStudyParameterFile = 'parameters_duval2003faradaic_micro2.m';
 
 c = 4;
-caseStudyTitleSuffix = '_duval2003faradaic_micro_case_d';
+caseStudyTitleSuffix = '_duval2003faradaic_micro2_case_d';
 
-
-makeGeometryPartFileMacro
+hMaxFactor = 0.1;
 makeGeometryPartFile
 
 % meshFile = 'copySimpleBulkGeometryMeshCoarse_case_c.m';
 % meshFile = 'copySimpleBulkGeometryRefinedMesh.m';
 
 pname = { 'sweep' 'DeltaPHI' };
-plistarr = { 'range(1,1,10)' 'range(0.2,0.2,2)' };
+plistarr = { 'range(1,1,1)' 'range(0.2,0.2,0.2)' };
 
 batchTertiaryCurrentDistribution2d
 
 batchTertiaryCurrentDistribution2dWithNetCurrentConstraint
 
-hMaxFactor = 0.001;
+hMaxFactor = 0.01;
 batchPDE1dSweep
 % runDilutedSpeciesAndElectrostatics1dSweep
 
-batchDilutetSpeciesAndElectrostatics2dPureDirichlet
+%batchDilutetSpeciesAndElectrostatics2dPureDirichlet
 
 batchDilutetSpeciesAndElectrostatics2d
