@@ -2,7 +2,7 @@ caseStudyParameterFile = 'parameters_zhang2015control_inert.m';
 
 caseStudyTitleSuffix = '_zhang2015control_inert';
 
-hMaxFactor = 1;
+hMaxFactor = 0.1;
 
 makeGeometryPartFileMacro
 
