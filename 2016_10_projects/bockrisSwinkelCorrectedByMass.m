@@ -174,7 +174,7 @@ end
 % for i = 1:(pn*pm)
 %     ax{i} = subplot(pm,pn,i);
 % end
-%% fit Langmuir, single
+%% fit Langmuir, single, corrected by zero mass
 N = numel(xNum);
 selection = cell(N,1);
 cDSmSel = cell(N,1);
@@ -190,21 +190,22 @@ end
 
 % ft = fittype('m0*beta*c/(1+beta*c)','independent','c');
 % fo = fitoptions(ft);
-fo = fitoptions('Method','NonlinearLeastSquares');
-fo.TolFun=1e-12;
-fo.TolX=1e-12;
-fo.DiffMinChange=1e-12;
-fo.StartPoint = [0.5,5e-7];
-%fo.StartPoint = [1,1];
-fo.Lower = [0 0];
-fo.Robust = 'LAR';
-%fo.Display='iter';
-fo.Display='final';
-ft = fittype('m0*beta*c/(1+beta*c)','independent','c','options',fo);
 
 %fo.Robust = 'LAR';
 langmuirFit = cell(N,1);
 for i=1:N
+    fo = fitoptions('Method','NonlinearLeastSquares');
+    fo.TolFun=eps;
+    fo.TolX=eps;
+    fo.DiffMinChange=eps;
+    fo.StartPoint = [0.5,5e-7,0];
+    %fo.StartPoint = [1,1];
+    fo.Lower = [0 0,-max(mSel{i})];
+    fo.Robust = 'LAR';
+    %fo.Display='iter';
+    fo.Display='final';
+    ft = fittype('m0*beta*c/(1+beta*c)+mErr','independent','c','options',fo);
+
     langmuirFit{i} = fit(cDSmSel{i},mSel{i},ft,fo);
 %     plot(ax{1},xSel{i},langmuirFit{i}(cDSmSel{i}));
 %     hold(ax{1},'on');
@@ -485,7 +486,7 @@ end
 %     plot(ax{6},xSel{i},m0FrumkinTot{i});
 % end
 
-%% fit Frumkin 2, single
+%% fit Frumkin 2, single, corrected by zero mass
 
 %fo.Robust = 'LAR';
 frumkinFit2 = cell(N,1);
@@ -497,15 +498,15 @@ for i=1:N
     fo.TolX=1e-12;
     fo.DiffMinChange=1e-12;
     % A, beta, m0
-    fo.StartPoint = [1/max(mSel{i}),max(cDSmSel{i}),max(mSel{i})+eps];
+    fo.StartPoint = [1/max(mSel{i}),max(cDSmSel{i}),max(mSel{i})+eps,0];
     %fo.StartPoint = [1,1];
-    fo.Lower = [-Inf, eps, min(mSel{i})+eps];
-    fo.Upper = [Inf, 10*max(cDSmSel{i}) Inf];
+    fo.Lower = [-Inf, eps, min(mSel{i})+eps,0];
+    fo.Upper = [Inf, 10*max(cDSmSel{i}) Inf,min(mSel{i})];
 
     fo.Robust = 'LAR';
     %fo.Display='iter';
     fo.Display='final';
-    ft = fittype('beta*m/(m0-m)*exp(-2*A*m)','independent','m','options',fo);
+    ft = fittype('beta*(m-mErr)/(m0-m+mErr)*exp(-2*A*(m-mErr))','independent','m','options',fo);
     frumkinFit2{i} = fit(mSel{i},cDSmSel{i},ft,fo);
     
 %     plot(ax{1},xSel{i},langmuirFit{i}(cDSmSel{i}));
@@ -521,16 +522,15 @@ end
 %     hold(ax{1},'on');
 % end
 
-%% fit Frunkin, all
+%% fit Frunkin 2, all, corrected by zero mass
 
-frumkinTotFit2 = fit(mTot,cDSmTot,ft,fo);
+frumkin2TotFit = fit(mTot,cDSmTot,ft,fo);
 % for i=1:N
 %     plot(ax{2},xSel{i},langmuirTotFit(cDSmSel{i}));
 %     hold(ax{2},'on');
 % end
 
-m0Frumkin2 = cell(3,1);
-m0FrumkinTot2 = cell(3,1);
+m0Frumkin = cell(3,1);
 gamma = 0.1;
 relTol = 1e-12;
 for i=1:N
@@ -554,32 +554,7 @@ for i=1:N
             end
         end
                     
-        m0Frumkin2{i}(j) = fzero( @(m0) frumkinFit2{i}(m0)-cDSmSel{i}(j), [leftBnd,rightBnd] );
-    end 
-end
-
-x0 = [0+eps,frumkinTotFit2.m0-eps];
-
-for i=1:N        
-    for j = 1:numel(cDSmSel{i})
-        leftBnd = x0(1);
-        rightBnd = x0(2);
-        tol= relTol*(rightBnd-leftBnd);
-        while leftBnd+tol < rightBnd
-            leftVal = frumkinTotFit2(leftBnd)-cDSmSel{i}(j);
-            rightVal = frumkinTotFit2(rightBnd)-cDSmSel{i}(j);
-            if leftVal*rightVal > 0
-                if mSel{i}(j) > (leftBnd + rightBnd)/2;
-                    leftBnd = leftBnd+gamma*(rightBnd - leftBnd);
-                else
-                    rightBnd = rightBnd-gamma*(rightBnd - leftBnd);
-                end
-            else
-                break;
-            end
-        end
-                    
-        m0FrumkinTot2{i}(j) = fzero( @(m0) frumkinTotFit2(m0)-cDSmSel{i}(j), [leftBnd,rightBnd] );
+        m0Frumkin{i}(j) = fzero( @(m0) frumkinFit2{i}(m0)-cDSmSel{i}(j), [leftBnd,rightBnd] );
     end 
 end 
 
@@ -619,14 +594,9 @@ hold(ax{4},'off');
 for i=1:N
     plot(ax{5},xSel{i}(1:20:end),mSel{i}(1:20:end),'o');
     hold(ax{5},'on');
-    plot(ax{5},xSel{i},m0Frumkin2{i});
+    plot(ax{5},xSel{i},m0Frumkin{i});
 end
 
-for i=1:N
-    plot(ax{6},xSel{i}(1:20:end),mSel{i}(1:20:end),'o');
-    hold(ax{6},'on');
-    plot(ax{6},xSel{i},m0FrumkinTot2{i});
-end
 %% fit Tamkin, all
 
 tamkinTotFit = fit(cDSmTot,mTot,ft,fo);
@@ -689,7 +659,7 @@ for i=1:N
 end
 hold(ax{2},'off');
 
-%% fit Bockris-Swinkel, single
+%% fit Bockris-Swinkel, single,
 beta0 = exp(26280/(jlh.Constants.R*jlh.Constants.T))/55.5;
 betaInv0 = 1/beta0;
 f0 = -2.82;
@@ -706,7 +676,7 @@ for i=1:N
     fo.Lower = [eps max(mSel{i})];
     fo.Upper = [max(cDSmSel{i}) Inf];
     fo.Robust = 'LAR';
-    fo.Display='final';
+    fo.Display='iter';
     %fo.Display='final';
     ft = fittype(@(betaInv,m0,m) bockrisSwinkelModel(betaInv,f0,n0,m/m0),'independent','m');
     bockrisSwinkelFit{i} = fit(mSel{i},cDSmSel{i},ft,fo);
@@ -723,7 +693,7 @@ for i=1:N
     fo.Lower = [-10 0];
     fo.Upper = [5 20];
     fo.Robust = 'LAR';
-    fo.Display='final';
+    fo.Display='iter';
     %fo.Display='final';
     ft = fittype(@(f,n,m) bockrisSwinkelModel(bockrisSwinkelFit{i}.betaInv,f,n,m/bockrisSwinkelFit{i}.m0),'independent','m');
     bockrisSwinkelFit2{i} = fit(mSel{i},cDSmSel{i},ft,fo);
@@ -734,7 +704,7 @@ for i=1:N
     fo.Lower = [eps, max(mSel{i}), -10, 0];
     fo.Upper = [Inf Inf 5 20];
     fo.Robust = 'LAR';
-    fo.Display='final';
+    fo.Display='iter';
     %fo.Display='final';
     ft = fittype(@(betaInv,m0,f,n,m) bockrisSwinkelModel(betaInv,f,n,m/m0),'independent','m');
     bockrisSwinkelFit3{i} = fit(mSel{i},cDSmSel{i},ft,fo);
@@ -772,7 +742,7 @@ for i=1:N
 end
 hold(ax{2},'off');
 
-%% fit Bockris-Swinkel, single, neglect exponential term
+%% fit Bockris-Swinkel, single, neglect exponential term,  corrected by zero mass
 beta0 = exp(26280/(jlh.Constants.R*jlh.Constants.T))/55.5;
 betaInv0 = 1/beta0;
 % f0 = -2.82;
@@ -785,20 +755,23 @@ bockrisSwinkelModel = @(betaInv,n,theta) betaInv*(theta./(1-theta).^n).*((theta+
 bockrisSwinkelFit = cell(N,1);
 for i=1:N
     fo = fitoptions('Method','NonlinearLeastSquares');
-    fo.maxFunEvals = 500;
-    fo.maxIter = 200;
+    fo.maxFunEvals = 500000;
+    fo.maxIter = 200000;
     fo.TolFun=1e-12;
     fo.TolX=1e-12;
     fo.DiffMinChange=1e-12;
-    fo.StartPoint = [betaInv0 2*max(mSel{i}) 1];
-    fo.Lower = [eps max(mSel{i}) 0];
-    fo.Upper = [max(cDSmSel{i}) Inf 20];
+    fo.StartPoint = [betaInv0 1 2*max(mSel{i}) 0];
+    fo.Lower = [eps 0 min(mSel{i}) -min(mSel{i})];
+    fo.Upper = [max(cDSmSel{i}) 30 Inf max(mSel{i})];
     fo.Robust = 'LAR';
 %     fo.Display='iter';
     fo.Display='final';
-    ft = fittype(@(betaInv,m0,n,m) bockrisSwinkelModel(betaInv,n,m/m0),'independent','m');
+    ft = fittype(@(betaInv,n,m0,mErr,m) bockrisSwinkelModel(betaInv,n,(m-mErr)/m0),'independent','m');
     bockrisSwinkelFit{i} = fit(mSel{i},cDSmSel{i},ft,fo);
 end    
+
+bockrisSwinkelTotFit = fit(mTot,cDSmTot,ft,fo);
+
 % bockrisSwinkelFit2 = cell(N,1);
 % for i=1:N
 %     fo = fitoptions('Method','NonlinearLeastSquares');
@@ -830,14 +803,21 @@ end
 
 
 m0BockrisSwinkel = cell(3,1);
+m0BockrisSwinkelTot = cell(3,1);
 for i=1:N
-    x0 = [0+eps,bockrisSwinkelFit3{i}.m0-eps];
+    x0 = [0+eps,bockrisSwinkelFit{i}.m0-eps]+bockrisSwinkelFit{i}.mErr;
     for j = 1:numel(cDSmSel{i})
-        m0BockrisSwinkel{i}(j) = fzero( @(m0) bockrisSwinkelFit3{i}(m0)-cDSmSel{i}(j), x0 );
+        m0BockrisSwinkel{i}(j) = fzero( @(m0) bockrisSwinkelFit{i}(m0)-cDSmSel{i}(j), x0 );
+    end 
+    x0 = [0+eps,bockrisSwinkelTotFit.m0-eps]+bockrisSwinkelTotFit.mErr;
+    for j = 1:numel(cDSmSel{i})
+        m0BockrisSwinkelTot{i}(j) = fzero( @(m0) bockrisSwinkelTotFit(m0)-cDSmSel{i}(j), x0 );
     end 
 end 
+
+
 %% Bockris figure
-hFig2 = figure;
+hFig2 = figure(3);
 pm = 1;
 pn = 3;
 
@@ -860,14 +840,12 @@ for i=1:N
 end
 hold(ax{2},'off');
 
-%% fit unknown, all
-
-bockrisSwinkelTotFit = fit(0.9*mTot/max(mTot),cDSmTot,ft,fo);
 for i=1:N
-    plot(ax{11},xSel{i},bockrisSwinkelTotFit(cDSmSel{i}));
-    hold(ax{11},'on');
+    plot(ax{3},xSel{i}(1:20:end),mSel{i}(1:20:end),'o');
+    hold(ax{3},'on');
+    plot(ax{3},xSel{i},m0BockrisSwinkelTot{i});
 end
-hold(ax{11},'off');
+hold(ax{3},'off');
 %% Flory-Huggins
 
 %fo.Robust = 'LAR';
