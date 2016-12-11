@@ -961,3 +961,13 @@ for i = 1:N
     hold(ax{9},'on');
 end
 hold(ax{3},'off');
+
+%% export
+filenames = {   'zhang2015control_surface_data_0_1mA.txt',...
+                'zhang2015control_surface_data_0_2mA.txt',...
+                'zhang2015control_surface_data_0_4mA.txt' };
+    
+for i=1:N
+    tab = table(xSel{i},cDSmSel{i},mSel{i},'VariableNames',{'x','c','m'});
+    writetable(tab,filenames{i});
+end

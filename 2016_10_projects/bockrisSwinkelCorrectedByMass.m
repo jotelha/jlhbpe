@@ -743,10 +743,11 @@ end
 hold(ax{2},'off');
 
 %% fit Bockris-Swinkel, single, neglect exponential term,  corrected by zero mass
-beta0 = exp(26280/(jlh.Constants.R*jlh.Constants.T))/55.5;
-betaInv0 = 1/beta0;
-% f0 = -2.82;
-n0 = 10;
+% beta0 = exp(26280/(jlh.Constants.R*jlh.Constants.T))/55.5;
+% betaInv0 = 1/beta0;
+% % f0 = -2.82;
+% n0 = 10;
+
 
 % ft = fittype('betaInv*exp(-f*theta/theta0)*(theta/theta0/(1-theta/theta0)^n)*((theta/theta0+n*(1-theta/theta0))^(n-1)/n^n)','independent','theta','problem','theta0','options',fo);
 bockrisSwinkelModel = @(betaInv,n,theta) betaInv*(theta./(1-theta).^n).*((theta+n*(1-theta)).^(n-1)/n^n);
@@ -760,7 +761,8 @@ for i=1:N
     fo.TolFun=1e-12;
     fo.TolX=1e-12;
     fo.DiffMinChange=1e-12;
-    fo.StartPoint = [betaInv0 1 2*max(mSel{i}) 0];
+    %fo.StartPoint = [betaInv0 1 2*max(mSel{i}) 0];
+    fo.StartPoint = startValues(i,:);
     fo.Lower = [eps 0 min(mSel{i}) -min(mSel{i})];
     fo.Upper = [max(cDSmSel{i}) 30 Inf max(mSel{i})];
     fo.Robust = 'LAR';
@@ -818,6 +820,116 @@ end
 
 %% Bockris figure
 hFig2 = figure(3);
+pm = 1;
+pn = 3;
+
+ax = cell(1,pm*pn);
+for i = 1:(pn*pm)
+    ax{i} = subplot(pm,pn,i);
+end
+
+for i=1:N
+    plot(ax{1},xSel{i},bockrisSwinkelFit{i}(mSel{i}));
+    hold(ax{1},'on');
+end
+hold(ax{1},'off');
+
+
+for i=1:N
+    plot(ax{2},xSel{i}(1:20:end),mSel{i}(1:20:end),'o');
+        hold(ax{2},'on');
+    plot(ax{2},xSel{i},m0BockrisSwinkel{i});
+end
+hold(ax{2},'off');
+
+for i=1:N
+    plot(ax{3},xSel{i}(1:20:end),mSel{i}(1:20:end),'o');
+    hold(ax{3},'on');
+    plot(ax{3},xSel{i},m0BockrisSwinkelTot{i});
+end
+hold(ax{3},'off');
+
+%% fit Bockris-Swinkel, single, corrected by zero mass
+% beta0 = exp(26280/(jlh.Constants.R*jlh.Constants.T))/55.5;
+% betaInv0 = 1/beta0;
+% f0 = -2.82; % negative for repulsion
+% n0 = 10;
+% m00 = 3.5e-7;
+startValues = [ 0.2,  -2.9, 8,  3.5e-7, min(mSel{1}); ...
+                1,  -2.2, 18, 2.7e-7, min(mSel{2}); ...  
+                10,  -2.1, 18, 3.3e-7, min(mSel{3})];
+% ft = fittype('betaInv*exp(-f*theta/theta0)*(theta/theta0/(1-theta/theta0)^n)*((theta/theta0+n*(1-theta/theta0))^(n-1)/n^n)','independent','theta','problem','theta0','options',fo);
+bockrisSwinkelModel = @(betaInv,f,n,theta) betaInv*exp(-f*theta).*(theta./(1-theta).^n).*((theta+n*(1-theta)).^(n-1)/n^n);
+
+%fo.Robust = 'LAR';
+bockrisSwinkelFit = cell(N,1);
+for i=1:N
+    fo = fitoptions('Method','NonlinearLeastSquares');
+    fo.maxFunEvals = 50000;
+    fo.maxIter = 4000;
+    fo.TolFun=min(cDSmSel{i})*1e-3;
+    fo.TolX=min(mSel{i})*1e-3;
+%     fo.DiffMinChange=1e-6;
+    % f n m0 mErr
+%     fo.StartPoint = [betaInv0 f0 1 m00 0];
+    fo.StartPoint = startValues(i,:);   
+    fo.Lower = [eps 2*f0 0 min(mSel{i}) -max(mSel{i})];
+    fo.Upper = [max(cDSmSel{i}) 0 40 Inf max(mSel{i})];
+    fo.Robust = 'LAR';
+%     fo.Display='iter';
+    fo.Display='final';
+    ft = fittype(@(betaInv,f,n,m0,mErr,m) bockrisSwinkelModel(betaInv,f,n,(m-mErr)/m0),'independent','m');
+    bockrisSwinkelFit{i} = fit(mSel{i},cDSmSel{i},ft,fo);
+end    
+
+bockrisSwinkelTotFit = fit(mTot,cDSmTot,ft,fo);
+
+% bockrisSwinkelFit2 = cell(N,1);
+% for i=1:N
+%     fo = fitoptions('Method','NonlinearLeastSquares');
+%     % fo = fitoptions;
+%     % fo.TolFun=1e-12;
+%     % fo.TolX=1e-12;
+%     % fo.DiffMinChange=1e-12;
+%     % fo.StartPoint = [max(mTot)/2,1/(2*max(cDSmTot)),1/(2*max(cDSmTot))];
+%     fo.StartPoint = [-2.82,1];
+%     fo.Lower = [-10 0];
+%     fo.Upper = [5 20];
+%     fo.Robust = 'LAR';
+%     fo.Display='iter';
+%     %fo.Display='final';
+%     ft = fittype(@(f,n,m) bockrisSwinkelModel(bockrisSwinkelFit{i}.betaInv,f,n,m/bockrisSwinkelFit{i}.m0),'independent','m');
+%     bockrisSwinkelFit2{i} = fit(mSel{i},cDSmSel{i},ft,fo);
+% end
+% for i=1:N
+%     fo = fitoptions('Method','NonlinearLeastSquares');
+%     fo.StartPoint = [bockrisSwinkelFit{i}.betaInv bockrisSwinkelFit{i}.m0 bockrisSwinkelFit2{i}.f bockrisSwinkelFit2{i}.n];
+%     fo.Lower = [eps, max(mSel{i}), -10, 0];
+%     fo.Upper = [Inf Inf 5 20];
+%     fo.Robust = 'LAR';
+%     fo.Display='iter';
+%     %fo.Display='final';
+%     ft = fittype(@(betaInv,m0,f,n,m) bockrisSwinkelModel(betaInv,f,n,m/m0),'independent','m');
+%     bockrisSwinkelFit3{i} = fit(mSel{i},cDSmSel{i},ft,fo);
+% end 
+
+
+m0BockrisSwinkel = cell(3,1);
+m0BockrisSwinkelTot = cell(3,1);
+for i=1:N
+    x0 = [0+eps,bockrisSwinkelFit{i}.m0-eps]+bockrisSwinkelFit{i}.mErr;
+    for j = 1:numel(cDSmSel{i})
+        m0BockrisSwinkel{i}(j) = fzero( @(m0) bockrisSwinkelFit{i}(m0)-cDSmSel{i}(j), x0 );
+    end 
+    x0 = [0+eps,bockrisSwinkelTotFit.m0-eps]+bockrisSwinkelTotFit.mErr;
+    for j = 1:numel(cDSmSel{i})
+        m0BockrisSwinkelTot{i}(j) = fzero( @(m0) bockrisSwinkelTotFit(m0)-cDSmSel{i}(j), x0 );
+    end 
+end 
+
+
+%% Bockris figure
+hFig2 = figure;
 pm = 1;
 pn = 3;
 
